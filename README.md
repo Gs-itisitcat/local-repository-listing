@@ -13,12 +13,12 @@ List git local repository on your computer.
 
 - --all/-a: 全ドライブのルートから再帰的に検索 (デフォルト)
 - --path/-p: 検索するディレクトリパス
-- --recusive/-r: 再帰的に検索 (デフォルト)
-- --no-recusive/-R: 再帰的に検索しない
+- --recursive/-r: 再帰的に検索 (デフォルト)
+- --no-recursive/-R: 再帰的に検索しない
 - --list-only/-l: 検索結果の出力のみ
 - --verbose/-v: 詳細な情報表示 (--list-onlyの場合のみ有効)
 - --search [options]: optionで指定した文字列を含むリポジトリを検索 (複数指定可)
   - name: リポジトリ名
-  - path: リポジトリのパス (デフォルト) (pathとfullpathは排他)
-  - fullpath: リポジトリのフルパス (--allの場合pathと同じ) (pathとfullpathは排他)
+  - path: リポジトリのパス (デフォルト) (pathとfull-pathは排他)
+  - full-path: リポジトリのフルパス (--allの場合pathと同じ) (pathとfull-pathは排他)
   - url: リポジトリのURL
