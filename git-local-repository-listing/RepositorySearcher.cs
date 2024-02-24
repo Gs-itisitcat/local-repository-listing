@@ -15,7 +15,7 @@ public class RepositorySearcher
         IgnoreInaccessible = true,
         MatchType = MatchType.Simple,
         ReturnSpecialDirectories = false,
-        AttributesToSkip = FileAttributes.System | FileAttributes.Compressed | FileAttributes.Offline | FileAttributes.Temporary,
+        AttributesToSkip = FileAttributes.System | FileAttributes.Compressed | FileAttributes.Offline | FileAttributes.Temporary | FileAttributes.ReparsePoint,
     };
 
     private EnumerationOptions _enumerationOptions = new EnumerationOptions()
@@ -24,7 +24,7 @@ public class RepositorySearcher
         IgnoreInaccessible = true,
         MatchType = MatchType.Simple,
         ReturnSpecialDirectories = false,
-        AttributesToSkip = FileAttributes.System | FileAttributes.Compressed | FileAttributes.Offline | FileAttributes.Temporary
+        AttributesToSkip = FileAttributes.System | FileAttributes.Compressed | FileAttributes.Offline | FileAttributes.Temporary | FileAttributes.ReparsePoint,
     };
 
     /// <summary>
