@@ -21,12 +21,16 @@ public class ListLocalRepositoriesCommand : ConsoleAppBase
     public int Execute(
         [Option(0, ArgumentDescription)] string arg = "",
         [Option("r", RootDescription)] string root = "",
-        [Option("l", "List local repositories only")] bool listOnly = false
+        [Option("l", "List local repositories only")] bool listOnly = false,
+        [Option("n", "Non-recursive search")] bool nonRecursive = false
     )
     {
         var rootDirectories = string.IsNullOrEmpty(root) ? Environment.GetLogicalDrives() : [root];
 
-        var searcher = new RepositorySearcher(rootDirectories);
+
+        ISearcher searcher = nonRecursive
+            ? new NonRecursiveRepositorySearcher(rootDirectories)
+            : new RecursiveRepositorySearcher(rootDirectories);
 
         if (listOnly)
         {

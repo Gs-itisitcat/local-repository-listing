@@ -13,8 +13,7 @@ List git local repository on your computer.
 
 - --all/-a: 全ドライブのルートから再帰的に検索 (デフォルト)
 - --path/-p: 検索するディレクトリパス
-- --recursive/-r: 再帰的に検索 (デフォルト)
-- --no-recursive/-R: 再帰的に検索しない
+- --non-recursive/-n: 再帰的に検索しない
 - --list-only/-l: 検索結果の出力のみ
 - --verbose/-v: 詳細な情報表示 (--list-onlyの場合のみ有効)
 - --search [options]: optionで指定した文字列を含むリポジトリを検索 (複数指定可)

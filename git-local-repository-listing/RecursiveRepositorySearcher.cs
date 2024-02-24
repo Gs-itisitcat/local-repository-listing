@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents a class that searches for local repositories within specified root directories.
 /// </summary>
-public class RepositorySearcher
+public class RecursiveRepositorySearcher : ISearcher
 {
     private static string RootSearchPattern = "*";
     private static string SearchPattern = ".git";
@@ -31,7 +31,7 @@ public class RepositorySearcher
     /// Initializes a new instance of the RepositorySearcher class with the specified root directories.
     /// </summary>
     /// <param name="rootDirectories">An array of root directories to search for repositories.</param>
-    public RepositorySearcher(string[] rootDirectories)
+    public RecursiveRepositorySearcher(string[] rootDirectories)
     {
         RootDirectories = rootDirectories;
     }
@@ -39,7 +39,7 @@ public class RepositorySearcher
     /// <summary>
     /// Initializes a new instance of the RepositorySearcher class with the logical drives as the root directories.
     /// </summary>
-    public RepositorySearcher() : this(Environment.GetLogicalDrives()) { }
+    public RecursiveRepositorySearcher() : this(Environment.GetLogicalDrives()) { }
 
     /// <summary>
     /// Searches for repositories within the root directories.
