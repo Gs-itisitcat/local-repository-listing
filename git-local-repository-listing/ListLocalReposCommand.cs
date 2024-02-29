@@ -12,15 +12,23 @@ public class ListLocalRepositoriesCommand : ConsoleAppBase
     private const string RootDescription = "Root path of searching repositories";
     private const string ListOnlyDescription = "List local repositories only";
     private const string NonRecursiveDescription = "Search for repositories non-recursively";
-    private const string ExcludePathsDescription = "The paths to exclude from the search";
-    private const string ExcludeNamesDescription = "The directory names to exclude from the search";
+    private const string ExcludePathsDescription = "The paths to exclude from the search. Must be absolute paths.";
+    private const string ExcludeNamesDescription = """
+    The directory names to exclude from the search.
+                                        Any Path that contains the directory of the name will be excluded.
+                                        You can use glob patterns.
+    """;
 
     /// <summary>
-    /// Executes the command to list local repositories.
+    /// Executes the list local repositories command.
     /// </summary>
-    /// <param name="arg">The search pattern for repositories.</param>
-    /// <param name="root">The root path of searching repositories.</param>
-    /// <returns>The exit code of the command.</returns>
+    /// <param name="arg">Search pattern for repositories.</param>
+    /// <param name="root">Root path of searching repositories.</param>
+    /// <param name="listOnly">Flag to list local repositories only.</param>
+    /// <param name="nonRecursive">Flag to search for repositories non-recursively.</param>
+    /// <param name="excludePaths">The paths to exclude from the search. Must be absolute paths.</param>
+    /// <param name="excludeNames">The directory names to exclude from the search. Any Path that contains the directory of the name will be excluded. You can use glob patterns.</param>
+    /// <returns>The result of the command execution.</returns>
     [RootCommand]
     public int Execute(
         [Option(0, ArgumentDescription)] string arg = "",

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.FileSystemGlobbing;
+﻿using System.Collections.ObjectModel;
+using Microsoft.Extensions.FileSystemGlobbing;
 namespace ListLocalRepositories.Search;
 
 /// <summary>
@@ -7,8 +8,8 @@ namespace ListLocalRepositories.Search;
 public class NonRecursiveRepositorySearcher : ISearcher
 {
     public string[] RootDirectories { get; init; }
-    public string[] ExcludePaths { get; init; }
-    public string[] ExcludeNames { get; init; }
+    public ReadOnlyCollection<string> ExcludePaths { get; init; }
+    public ReadOnlyCollection<string> ExcludeNames { get; init; }
 
     private EnumerationOptions _enumerationOptions = new EnumerationOptions()
     {
@@ -34,31 +35,25 @@ public class NonRecursiveRepositorySearcher : ISearcher
     public NonRecursiveRepositorySearcher(string[] rootDirectories, string[] excludePaths, string[] excludeNames)
     {
         RootDirectories = rootDirectories;
-        ExcludePaths = excludePaths;
-        ExcludeNames = excludeNames;
-        _nameMatcher.AddIncludePatterns(ExcludeNames);
-        _pathMatcher.AddIncludePatterns(ExcludePaths);
+        ExcludePaths = excludePaths.AsReadOnly();
+        ExcludeNames = excludeNames.AsReadOnly();
+        _nameMatcher.AddIncludePatterns(excludeNames);
     }
 
     private Matcher _nameMatcher = new Matcher();
-    private Matcher _pathMatcher = new Matcher();
 
     /// <summary>
     /// Determines if the specified directory matches the exclusion criteria.
     /// </summary>
-    /// <param name="directoryInfo">The directory to check.</param>
+    /// <param name="directoryInfo">The <see cref="DirectoryInfo"/> object representing the directory to check.</param>
     /// <returns><c>true</c> if the directory matches the exclusion criteria; otherwise, <c>false</c>.</returns>
     private bool IsMatchExclude(DirectoryInfo directoryInfo)
     {
+        // FIXME: _pathMatcher.Match(directoryInfo.FullName).HasMatches is always false
         return directoryInfo.FullName.Split(Path.DirectorySeparatorChar).Any(p => _nameMatcher.Match(p).HasMatches)
-        || _pathMatcher.Match(directoryInfo.FullName).HasMatches;
+        || ExcludePaths.Any(p => directoryInfo.FullName.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Contains(p));
     }
 
-    /// <summary>
-    /// Searches for repositories within the root directories.
-    /// </summary>
-    /// <param name="cancellationToken">A cancellation token to cancel the search operation.</param>
-    /// <returns>A parallel query of repository paths.</returns>
     public ParallelQuery<DirectoryInfo> Search(CancellationToken cancellationToken)
     {
         return RootDirectories
@@ -68,6 +63,5 @@ public class NonRecursiveRepositorySearcher : ISearcher
         .Select(d => new DirectoryInfo(d))
         .Where(d => d.GetDirectories(".git", SearchOption.TopDirectoryOnly).Any())
         .Where(d => !IsMatchExclude(d));
-        // .Select(d => d!.FullName.Replace("\\", "/"));
     }
 }
