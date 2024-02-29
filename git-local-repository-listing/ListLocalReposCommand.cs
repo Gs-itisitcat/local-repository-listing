@@ -49,7 +49,7 @@ public class ListLocalRepositoriesCommand : ConsoleAppBase
             : new RecursiveRepositorySearcher(rootDirectories, excludePaths ?? [], excludeNames ?? []);
 
         ISearchResultProcessor processor = listOnly
-            ? new ConsoleOutputProcessor()
+            ? new ConsoleOutputProcessor(arg)
             : new FZFProcessor(arg, fuzzyFinderArgs ?? []);
 
 

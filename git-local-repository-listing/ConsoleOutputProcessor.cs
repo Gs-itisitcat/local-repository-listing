@@ -2,6 +2,12 @@
 
 public class ConsoleOutputProcessor : ISearchResultProcessor
 {
+    private string _searchPattern;
+    public ConsoleOutputProcessor(string searchPattern)
+    {
+        _searchPattern = searchPattern;
+    }
+
     /// <summary>
     /// Processes the search result by printing the full names of the directories to the console.
     /// </summary>
@@ -14,8 +20,10 @@ public class ConsoleOutputProcessor : ISearchResultProcessor
         {
             var searchTask = Task.Run(() =>
                 searchResult
+                .Select(d => d.FullName.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
+                .Where(d => d.Contains(_searchPattern, StringComparison.OrdinalIgnoreCase))
                 .ForAll(d =>
-                    Console.WriteLine(d.FullName.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
+                    Console.WriteLine(d)
                     ), searchCancellationTokenSource.Token
             );
 
