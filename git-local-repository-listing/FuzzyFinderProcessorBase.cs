@@ -56,9 +56,9 @@ public abstract class FuzzyFinderProcessorBase: ISearchResultProcessor
 
         // Get the standard input of the redirected fuzzy finder process
         // For thread safety, use a synchronized wrapper around the StandardInput stream
-        using var fzfInput = TextWriter.Synchronized(process.StandardInput);
+        using var input = TextWriter.Synchronized(process.StandardInput);
 
-        if (fzfInput == null)
+        if (input == null)
         {
             Console.Error.WriteLine($"Failed to get StandardInput of {FuzzyFinderName}");
             return 1;
@@ -68,7 +68,7 @@ public abstract class FuzzyFinderProcessorBase: ISearchResultProcessor
         _ = Task.Run(() =>
             searched
             .ForAll(d =>
-                fzfInput.WriteLine(d.FullName.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
+                input.WriteLine(d.FullName.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
             ), searchCancellationTokenSource.Token);
 
         // WaitForExitAsync() causes OperationCanceledException and prevents fuzzy finder from starting for some reason
