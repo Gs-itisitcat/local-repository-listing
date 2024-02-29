@@ -18,6 +18,7 @@ public class ListLocalRepositoriesCommand : ConsoleAppBase
                                         Any Path that contains the directory of the name will be excluded.
                                         You can use glob patterns.
     """;
+    private const string FuzzyFinderArgsDescription = "Arguments to pass to the fuzzy finder process.";
 
     /// <summary>
     /// Executes the list local repositories command.
@@ -36,7 +37,8 @@ public class ListLocalRepositoriesCommand : ConsoleAppBase
         [Option("l", ListOnlyDescription)] bool listOnly = false,
         [Option("n", NonRecursiveDescription)] bool nonRecursive = false,
         [Option("E", ExcludePathsDescription)] string[]? excludePaths = null,
-        [Option("e", ExcludeNamesDescription)] string[]? excludeNames = null
+        [Option("e", ExcludeNamesDescription)] string[]? excludeNames = null,
+        [Option("a", FuzzyFinderArgsDescription)] string[]? fuzzyFinderArgs = null
     )
     {
         var rootDirectories = string.IsNullOrEmpty(root) ? Environment.GetLogicalDrives() : [root];
@@ -48,7 +50,7 @@ public class ListLocalRepositoriesCommand : ConsoleAppBase
 
         ISearchResultProcessor processor = listOnly
             ? new ConsoleOutputProcessor()
-            : new FZFProcessor(arg);
+            : new FZFProcessor(arg, fuzzyFinderArgs ?? []);
 
 
         // Pass the cancellation token source of search cancellation token to the fuzzy finder process

@@ -16,6 +16,7 @@ List git local repository on your computer.
 - --list-only/-l: 検索結果の出力のみ
 - --exclude-name/-e: 検索対象から除外するディレクトリ名 (複数指定可)
 - --exclude-path/-E: 検索対象から除外するディレクトリパス (複数指定可)
+- --fuzzy-finder-args/-a: fzfに渡す引数 (複数指定可)
 - --search [options]: optionで指定した文字列を含むリポジトリを検索 (複数指定可)
   - name: リポジトリ名
   - path: リポジトリのパス (デフォルト) (pathとfull-pathは排他)
