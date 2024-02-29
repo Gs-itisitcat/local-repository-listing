@@ -49,7 +49,6 @@ public class NonRecursiveRepositorySearcher : ISearcher
     /// <returns><c>true</c> if the directory matches the exclusion criteria; otherwise, <c>false</c>.</returns>
     private bool IsMatchExclude(DirectoryInfo directoryInfo)
     {
-        // FIXME: _pathMatcher.Match(directoryInfo.FullName).HasMatches is always false
         return directoryInfo.FullName.Split(Path.DirectorySeparatorChar).Any(p => _nameMatcher.Match(p).HasMatches)
         || ExcludePaths.Any(p => directoryInfo.FullName.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Contains(p));
     }
