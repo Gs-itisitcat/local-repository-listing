@@ -46,6 +46,7 @@ public class ListLocalRepositoriesCommand : ConsoleAppBase
         // Pass the cancellation token source of search cancellation token to the fuzzy finder process
         // to cancel the search when the fuzzy finder process is terminated.
         var cts = new CancellationTokenSource();
+        Context.CancellationToken.Register(cts.Cancel);
         return processor.ProcessSearchResult(searcher.Search(cts.Token), cts);
     }
 }

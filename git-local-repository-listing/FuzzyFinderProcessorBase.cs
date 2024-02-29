@@ -65,7 +65,11 @@ public abstract class FuzzyFinderProcessorBase: ISearchResultProcessor
         }
 
         // Write the found repositories to the standard input while fuzzy finder is running
-        _ = Task.Run(() => searched.ForAll(d => fzfInput.WriteLine(d.FullName)), searchCancellationTokenSource.Token);
+        _ = Task.Run(() =>
+            searched
+            .ForAll(d =>
+                fzfInput.WriteLine(d.FullName.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
+            ), searchCancellationTokenSource.Token);
 
         // WaitForExitAsync() causes OperationCanceledException and prevents fuzzy finder from starting for some reason
         process.WaitForExit();
