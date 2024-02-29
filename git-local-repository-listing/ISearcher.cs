@@ -2,5 +2,5 @@
 
 public interface ISearcher
 {
-    public ParallelQuery<string> Search(CancellationToken cancellationToken);
+    public ParallelQuery<DirectoryInfo> Search(CancellationToken cancellationToken);
 }

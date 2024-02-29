@@ -46,7 +46,7 @@ public class RecursiveRepositorySearcher : ISearcher
     /// </summary>
     /// <param name="cancellationToken">A cancellation token to cancel the search operation.</param>
     /// <returns>A parallel query of repository paths.</returns>
-    public ParallelQuery<string> Search(CancellationToken cancellationToken)
+    public ParallelQuery<DirectoryInfo> Search(CancellationToken cancellationToken)
     {
         return RootDirectories
         .AsParallel()
@@ -58,6 +58,7 @@ public class RecursiveRepositorySearcher : ISearcher
         .SelectMany(d => Directory.EnumerateDirectories(d, SearchPattern, _enumerationOptions))
         .Select(d => Directory.GetParent(d))
         .Where(d => d != null)
-        .Select(d => d!.FullName.Replace("\\", "/"));
+        .Select(d => d ?? throw new InvalidOperationException("Directory.GetParent returns null"));
+        // .Select(d => d!.FullName.Replace("\\", "/"));
     }
 }

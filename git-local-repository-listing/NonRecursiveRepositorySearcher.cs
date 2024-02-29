@@ -30,14 +30,14 @@ public class NonRecursiveRepositorySearcher : ISearcher
     /// </summary>
     /// <param name="cancellationToken">A cancellation token to cancel the search operation.</param>
     /// <returns>A parallel query of repository paths.</returns>
-    public ParallelQuery<string> Search(CancellationToken cancellationToken)
+    public ParallelQuery<DirectoryInfo> Search(CancellationToken cancellationToken)
     {
         return RootDirectories
         .AsParallel()
         .WithCancellation(cancellationToken)
         .SelectMany(d => Directory.EnumerateDirectories(d, "*", _enumerationOptions))
         .Select(d => new DirectoryInfo(d))
-        .Where(d => d.GetDirectories(".git", SearchOption.TopDirectoryOnly).Any())
-        .Select(d => d!.FullName.Replace("\\", "/"));
+        .Where(d => d.GetDirectories(".git", SearchOption.TopDirectoryOnly).Any());
+        // .Select(d => d!.FullName.Replace("\\", "/"));
     }
 }

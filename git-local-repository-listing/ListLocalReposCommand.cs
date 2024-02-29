@@ -32,17 +32,14 @@ public class ListLocalRepositoriesCommand : ConsoleAppBase
             ? new NonRecursiveRepositorySearcher(rootDirectories)
             : new RecursiveRepositorySearcher(rootDirectories);
 
-        if (listOnly)
-        {
-            searcher.Search(Context.CancellationToken).ForAll(Console.WriteLine);
-            return 0;
-        }
+        ISearchResultProcessor processor = listOnly
+            ? new ConsoleOutputProcessor()
+            : new FZFProcessor(arg);
 
-        var fzf = new FZFProcess(arg);
 
         // Pass the cancellation token source of search cancellation token to the fuzzy finder process
         // to cancel the search when the fuzzy finder process is terminated.
         var cts = new CancellationTokenSource();
-        return fzf.Run(searcher.Search(cts.Token), cts);
+        return processor.ProcessSearchResult(searcher.Search(cts.Token), cts);
     }
 }
