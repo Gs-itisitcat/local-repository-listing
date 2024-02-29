@@ -11,11 +11,9 @@ List git local repository on your computer.
 
 ### flags
 
-- --all/-a: 全ドライブのルートから再帰的に検索 (デフォルト)
-- --path/-p: 検索するディレクトリパス
+- --root/-r: 検索するディレクトリパス
 - --non-recursive/-n: 再帰的に検索しない
 - --list-only/-l: 検索結果の出力のみ
-- --verbose/-v: 詳細な情報表示 (--list-onlyの場合のみ有効)
 - --search [options]: optionで指定した文字列を含むリポジトリを検索 (複数指定可)
   - name: リポジトリ名
   - path: リポジトリのパス (デフォルト) (pathとfull-pathは排他)
