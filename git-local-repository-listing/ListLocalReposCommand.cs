@@ -35,8 +35,8 @@ public class ListLocalRepositoriesCommand : ConsoleAppBase
         [Option("r", RootDescription)] string root = "",
         [Option("l", ListOnlyDescription)] bool listOnly = false,
         [Option("n", NonRecursiveDescription)] bool nonRecursive = false,
-        [Option("e", ExcludePathsDescription)] string[]? excludePaths = null,
-        [Option("E", ExcludeNamesDescription)]string[]? excludeNames = null
+        [Option("E", ExcludePathsDescription)] string[]? excludePaths = null,
+        [Option("e", ExcludeNamesDescription)] string[]? excludeNames = null
     )
     {
         var rootDirectories = string.IsNullOrEmpty(root) ? Environment.GetLogicalDrives() : [root];
