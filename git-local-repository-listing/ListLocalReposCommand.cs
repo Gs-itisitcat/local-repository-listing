@@ -10,6 +10,10 @@ public class ListLocalRepositoriesCommand : ConsoleAppBase
 {
     private const string ArgumentDescription = "Search pattern for repositories";
     private const string RootDescription = "Root path of searching repositories";
+    private const string ListOnlyDescription = "List local repositories only";
+    private const string NonRecursiveDescription = "Search for repositories non-recursively";
+    private const string ExcludePathsDescription = "The paths to exclude from the search";
+    private const string ExcludeNamesDescription = "The directory names to exclude from the search";
 
     /// <summary>
     /// Executes the command to list local repositories.
@@ -21,16 +25,18 @@ public class ListLocalRepositoriesCommand : ConsoleAppBase
     public int Execute(
         [Option(0, ArgumentDescription)] string arg = "",
         [Option("r", RootDescription)] string root = "",
-        [Option("l", "List local repositories only")] bool listOnly = false,
-        [Option("n", "Non-recursive search")] bool nonRecursive = false
+        [Option("l", ListOnlyDescription)] bool listOnly = false,
+        [Option("n", NonRecursiveDescription)] bool nonRecursive = false,
+        [Option("e", ExcludePathsDescription)] string[]? excludePaths = null,
+        [Option("E")]string[]? excludeNames = null
     )
     {
         var rootDirectories = string.IsNullOrEmpty(root) ? Environment.GetLogicalDrives() : [root];
 
 
         ISearcher searcher = nonRecursive
-            ? new NonRecursiveRepositorySearcher(rootDirectories)
-            : new RecursiveRepositorySearcher(rootDirectories);
+            ? new NonRecursiveRepositorySearcher(rootDirectories, excludePaths ?? [], excludeNames ?? [])
+            : new RecursiveRepositorySearcher(rootDirectories, excludePaths ?? [], excludeNames ?? []);
 
         ISearchResultProcessor processor = listOnly
             ? new ConsoleOutputProcessor()

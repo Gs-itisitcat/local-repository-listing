@@ -1,4 +1,5 @@
-﻿namespace ListLocalRepositories.Search;
+﻿using Microsoft.Extensions.FileSystemGlobbing;
+namespace ListLocalRepositories.Search;
 
 /// <summary>
 /// Represents a class that searches for local repositories within specified root directories.
@@ -7,7 +8,9 @@ public class RecursiveRepositorySearcher : ISearcher
 {
     private static string RootSearchPattern = "*";
     private static string SearchPattern = ".git";
-    public string[] RootDirectories { get; private set; }
+    public string[] RootDirectories { get; init; }
+    public string[] ExcludePaths { get; init; }
+    public string[] ExcludeNames { get; init; }
 
     private EnumerationOptions _rootEnumerationOptions = new EnumerationOptions()
     {
@@ -27,13 +30,35 @@ public class RecursiveRepositorySearcher : ISearcher
         AttributesToSkip = FileAttributes.System | FileAttributes.Compressed | FileAttributes.Offline | FileAttributes.Temporary | FileAttributes.ReparsePoint,
     };
 
+    private Matcher _nameMatcher = new Matcher();
+    private Matcher _pathMatcher = new Matcher();
+
+    private bool IsMatchExclude(DirectoryInfo directoryInfo)
+    {
+        // FIXME: _pathMatcher.Match(directoryInfo.FullName).HasMatches is always false
+        return directoryInfo.FullName.Split(Path.DirectorySeparatorChar).Any(p => _nameMatcher.Match(p).HasMatches)
+        || _pathMatcher.Match(directoryInfo.FullName).HasMatches;
+    }
+
     /// <summary>
     /// Initializes a new instance of the RepositorySearcher class with the specified root directories.
     /// </summary>
     /// <param name="rootDirectories">An array of root directories to search for repositories.</param>
-    public RecursiveRepositorySearcher(string[] rootDirectories)
+    public RecursiveRepositorySearcher(string[] rootDirectories) : this(rootDirectories, [], []) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RecursiveRepositorySearcher"/> class.
+    /// </summary>
+    /// <param name="rootDirectories">The root directories to search in.</param>
+    /// <param name="excludePaths">The paths to exclude from the search.</param>
+    /// <param name="excludeNames">The names to exclude from the search.</param>
+    public RecursiveRepositorySearcher(string[] rootDirectories, string[] excludePaths, string[] excludeNames)
     {
         RootDirectories = rootDirectories;
+        ExcludePaths = excludePaths;
+        ExcludeNames = excludeNames;
+        _nameMatcher.AddIncludePatterns(ExcludeNames);
+        _pathMatcher.AddIncludePatterns(ExcludePaths);
     }
 
     /// <summary>
@@ -54,11 +79,12 @@ public class RecursiveRepositorySearcher : ISearcher
         .SelectMany(d => Directory.EnumerateDirectories(d, RootSearchPattern, _rootEnumerationOptions))
         .AsParallel() // Somehow faster with this additional AsParallel()
         .WithCancellation(cancellationToken)
-        .Where(d => !d.Contains("Windows.old")) // 一旦ハードコード
+        .Where(d => !IsMatchExclude(new DirectoryInfo(d)))
         .SelectMany(d => Directory.EnumerateDirectories(d, SearchPattern, _enumerationOptions))
         .Select(d => Directory.GetParent(d))
         .Where(d => d != null)
-        .Select(d => d ?? throw new InvalidOperationException("Directory.GetParent returns null"));
+        .Select(d => d ?? throw new InvalidOperationException("Directory.GetParent returns null"))
+        .Where(d => !IsMatchExclude(d));
         // .Select(d => d!.FullName.Replace("\\", "/"));
     }
 }
