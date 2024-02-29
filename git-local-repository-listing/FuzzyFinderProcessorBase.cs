@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 namespace ListLocalRepositories.FuzzyFinder;
 
@@ -13,17 +14,19 @@ public abstract class FuzzyFinderProcessorBase: ISearchResultProcessor
     public abstract string FuzzyFinderName { get; }
 
     /// <summary>
-    /// Gets or sets the arguments for the fuzzy finder process.
+    /// Gets the arguments for the processor.
     /// </summary>
-    public string[] Arguments { get; protected set; } = [];
+    public ReadOnlyCollection<string> Arguments => _arguments.AsReadOnly();
+    private string[] _arguments = [];
 
     private ProcessStartInfo _processStartInfo;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FuzzyFinderProcessorBase"/> class.
     /// </summary>
-    public FuzzyFinderProcessorBase()
+    public FuzzyFinderProcessorBase(string[] arguments)
     {
+        _arguments = arguments;
         _processStartInfo = new ProcessStartInfo(FuzzyFinderName)
         {
             // UseShellExecute is set to false to start the child process without using a shell
@@ -31,7 +34,7 @@ public abstract class FuzzyFinderProcessorBase: ISearchResultProcessor
             RedirectStandardInput = true,
             // For Non-ASCII characters
             StandardInputEncoding = System.Text.Encoding.UTF8,
-            Arguments = string.Join(" ", Arguments),
+            Arguments = string.Join(" ", arguments),
         };
     }
 

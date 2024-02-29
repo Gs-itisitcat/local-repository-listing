@@ -7,9 +7,7 @@ public class FZFProcessor : FuzzyFinderProcessorBase
     private static readonly string _fuzzyFinderName = "fzf";
     public override string FuzzyFinderName => _fuzzyFinderName;
 
-    public FZFProcessor(string? searchPattern) : base()
-    {
-        Arguments = [
+    public FZFProcessor(string? searchPattern) : base(arguments: [
             "--ansi",
             "--header",
             "\"Select a git repository\"",
@@ -24,6 +22,6 @@ public class FZFProcessor : FuzzyFinderProcessorBase
             "\"?:preview:git -C {} log --color=always --graph --all --pretty=format:'%C(auto)%<(30,trunc)%s %C(cyan)%cr %C(auto)%d' \"",
             "--query",
             $"{(string.IsNullOrWhiteSpace(searchPattern) ? "\"\"" : searchPattern)}"
-            ];
-    }
+    ])
+    { }
 }
