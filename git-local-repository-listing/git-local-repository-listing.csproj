@@ -6,6 +6,7 @@
     <RootNamespace>ListLocalRepositories</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AssemblyName>lepol</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
