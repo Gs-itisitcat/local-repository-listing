@@ -1,10 +1,25 @@
 # git-local-repository-listing
 
+JA | [EN](README-en.md)
+
 List git local repository on your computer.
 
-ローカルにあるgitリポジトリを検索し、fazzy finderで選択して移動するためのツール
+ローカルにあるgitリポジトリを検索し、fazzy finderで選択して移動するツール
 
-## 実装予定コマンド
+## インストール
+
+[Release](https://github.com/Gs-itisitcat/git-local-repository-listing/releases)からダウンロードして、任意のディレクトリに配置してください。
+lepos.bashを.bashrcなどにsourceしてください。
+
+```bash
+source /path/to/lepos.bash
+```
+
+## コマンド
+
+```bash
+lepos [options] [query]
+```
 
 - 引数無し: 全ドライブのルートから再帰的に検索
 - 引数有り: 全ドライブのルートから再帰的に検索し、引数で指定したディレクトリ名を含むリポジトリをクエリ
@@ -17,8 +32,3 @@ List git local repository on your computer.
 - --exclude-name/-e: 検索対象から除外するディレクトリ名 (複数指定可)
 - --exclude-path/-ep: 検索対象から除外するディレクトリパス (複数指定可)
 - --fuzzy-finder-args/-a: fzfに渡す引数 (複数指定可)
-- --search [options]: optionで指定した文字列を含むリポジトリを検索 (複数指定可)
-  - name: リポジトリ名
-  - path: リポジトリのパス (デフォルト) (pathとfull-pathは排他)
-  - full-path: リポジトリのフルパス (--allの場合pathと同じ) (pathとfull-pathは排他)
-  - url: リポジトリのURL
