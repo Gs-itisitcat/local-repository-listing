@@ -11,7 +11,7 @@ public class NonRecursiveRepositorySearcher : ISearcher
     public ReadOnlyCollection<string> ExcludePaths { get; init; }
     public ReadOnlyCollection<string> ExcludeNames { get; init; }
 
-    private EnumerationOptions _enumerationOptions = new EnumerationOptions()
+    private static readonly EnumerationOptions _enumerationOptions = new()
     {
         RecurseSubdirectories = false,
         IgnoreInaccessible = true,
@@ -40,7 +40,7 @@ public class NonRecursiveRepositorySearcher : ISearcher
         _nameMatcher.AddIncludePatterns(excludeNames);
     }
 
-    private Matcher _nameMatcher = new Matcher();
+    private readonly Matcher _nameMatcher = new();
 
     /// <summary>
     /// Determines if the specified directory matches the exclusion criteria.

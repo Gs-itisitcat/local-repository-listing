@@ -1,13 +1,6 @@
-﻿using System.Diagnostics;
+﻿namespace ListLocalRepositories.FuzzyFinder;
 
-namespace ListLocalRepositories.FuzzyFinder;
-
-public class FZFProcessor : FuzzyFinderProcessorBase
-{
-    private static readonly string _fuzzyFinderName = "fzf";
-    public override string FuzzyFinderName => _fuzzyFinderName;
-
-    public FZFProcessor(string? searchPattern, string[] args) : base(arguments: [
+public class FZFProcessor(string? searchPattern, string[] args) : FuzzyFinderProcessorBase(arguments: [
             "--ansi",
             "--header",
             "\"Select a git repository\"",
@@ -24,5 +17,7 @@ public class FZFProcessor : FuzzyFinderProcessorBase
             $"{(string.IsNullOrWhiteSpace(searchPattern) ? "\"\"" : searchPattern)}",
             ..args
     ])
-    { }
+{
+    private static readonly string _fuzzyFinderName = "fzf";
+    public override string FuzzyFinderName => _fuzzyFinderName;
 }

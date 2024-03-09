@@ -1,12 +1,16 @@
 ﻿namespace ListLocalRepositories;
 
-public class ConsoleOutputProcessor : ISearchResultProcessor
+/// <summary>
+/// Initializes a new instance of the <see cref="ConsoleOutputProcessor"/> class with the specified search pattern.
+/// </summary>
+/// <param name="searchPattern">The search pattern to match against the full names of the directories.</param>
+public class ConsoleOutputProcessor(string searchPattern) : ISearchResultProcessor
 {
-    private string _searchPattern;
-    public ConsoleOutputProcessor(string searchPattern)
-    {
-        _searchPattern = searchPattern;
-    }
+    /// <summary>
+    /// The search pattern to match against the full names of the directories.
+    /// </summary>
+    private readonly string _searchPattern = searchPattern;
+
 
     /// <summary>
     /// Processes the search result by printing the full names of the directories to the console.

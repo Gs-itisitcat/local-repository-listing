@@ -7,13 +7,13 @@ namespace ListLocalRepositories.Search;
 /// </summary>
 public class RecursiveRepositorySearcher : ISearcher
 {
-    private static string RootSearchPattern = "*";
-    private static string SearchPattern = ".git";
+    private static readonly string _rootSearchPattern = "*";
+    private static readonly string _searchPattern = ".git";
     public string[] RootDirectories { get; init; }
     public ReadOnlyCollection<string> ExcludePaths { get; init; }
     public ReadOnlyCollection<string> ExcludeNames { get; init; }
 
-    private EnumerationOptions _rootEnumerationOptions = new EnumerationOptions()
+    private static readonly EnumerationOptions _rootEnumerationOptions = new()
     {
         RecurseSubdirectories = false,
         IgnoreInaccessible = true,
@@ -22,7 +22,7 @@ public class RecursiveRepositorySearcher : ISearcher
         AttributesToSkip = FileAttributes.System | FileAttributes.Compressed | FileAttributes.Offline | FileAttributes.Temporary | FileAttributes.ReparsePoint,
     };
 
-    private EnumerationOptions _enumerationOptions = new EnumerationOptions()
+    private static readonly EnumerationOptions _enumerationOptions = new()
     {
         RecurseSubdirectories = true,
         IgnoreInaccessible = true,
@@ -31,7 +31,7 @@ public class RecursiveRepositorySearcher : ISearcher
         AttributesToSkip = FileAttributes.System | FileAttributes.Compressed | FileAttributes.Offline | FileAttributes.Temporary | FileAttributes.ReparsePoint,
     };
 
-    private Matcher _nameMatcher = new Matcher();
+    private readonly Matcher _nameMatcher = new();
 
     /// <summary>
     /// Determines if the specified directory matches the exclusion criteria.
@@ -74,11 +74,11 @@ public class RecursiveRepositorySearcher : ISearcher
         return RootDirectories
         .AsParallel()
         .WithCancellation(cancellationToken)
-        .SelectMany(d => Directory.EnumerateDirectories(d, RootSearchPattern, _rootEnumerationOptions))
+        .SelectMany(d => Directory.EnumerateDirectories(d, _rootSearchPattern, _rootEnumerationOptions))
         .AsParallel() // Somehow faster with this additional AsParallel()
         .WithCancellation(cancellationToken)
         .Where(d => !IsMatchExclude(new DirectoryInfo(d)))
-        .SelectMany(d => Directory.EnumerateDirectories(d, SearchPattern, _enumerationOptions))
+        .SelectMany(d => Directory.EnumerateDirectories(d, _searchPattern, _enumerationOptions))
         .Select(d => Directory.GetParent(d))
         .Where(d => d != null)
         .Select(d => d ?? throw new InvalidOperationException("Directory.GetParent returns null"))

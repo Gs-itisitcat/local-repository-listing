@@ -17,7 +17,7 @@ public abstract class FuzzyFinderProcessorBase: ISearchResultProcessor
     /// Gets the arguments for the processor.
     /// </summary>
     public ReadOnlyCollection<string> Arguments => _arguments.AsReadOnly();
-    private string[] _arguments = [];
+    private readonly string[] _arguments = [];
 
     private ProcessStartInfo _processStartInfo;
 
