@@ -1,12 +1,12 @@
-﻿using ListLocalRepositories.Search;
-using ListLocalRepositories.FuzzyFinder;
+﻿using LocalRepositoryListing.Searcher;
+using LocalRepositoryListing.ResultProcessor;
 
-namespace ListLocalRepositories.Command;
+namespace LocalRepositoryListing.Command;
 
 /// <summary>
 /// Represents a command for listing local repositories.
 /// </summary>
-public class ListLocalRepositoriesCommand : ConsoleAppBase
+public class LocalRepositoryListingCommand : ConsoleAppBase
 {
     public const string ArgumentDescription = "Search pattern for repositories";
     public const string RootDescription = """

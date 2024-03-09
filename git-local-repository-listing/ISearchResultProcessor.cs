@@ -1,4 +1,4 @@
-﻿namespace ListLocalRepositories;
+﻿namespace LocalRepositoryListing.ResultProcessor;
 
 public interface ISearchResultProcessor
 {

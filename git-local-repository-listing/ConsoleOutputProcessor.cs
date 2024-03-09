@@ -1,4 +1,4 @@
-﻿namespace ListLocalRepositories;
+﻿namespace LocalRepositoryListing.ResultProcessor;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="ConsoleOutputProcessor"/> class with the specified search pattern.

@@ -1,12 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 
-namespace ListLocalRepositories.FuzzyFinder;
+namespace LocalRepositoryListing.ResultProcessor;
 
 /// <summary>
 /// Represents the base class for a fuzzy finder process.
 /// </summary>
-public abstract class FuzzyFinderProcessorBase: ISearchResultProcessor
+public abstract class FuzzyFinderProcessorBase : ISearchResultProcessor
 {
     /// <summary>
     /// Gets the name of the fuzzy finder.

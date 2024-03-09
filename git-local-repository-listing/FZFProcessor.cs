@@ -1,4 +1,4 @@
-﻿namespace ListLocalRepositories.FuzzyFinder;
+﻿namespace LocalRepositoryListing.ResultProcessor;
 
 public class FZFProcessor(string? searchPattern, string[] args) : FuzzyFinderProcessorBase(arguments: [
             "--ansi",

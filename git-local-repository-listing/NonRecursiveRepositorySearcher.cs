@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using Microsoft.Extensions.FileSystemGlobbing;
-namespace ListLocalRepositories.Search;
+namespace LocalRepositoryListing.Searcher;
 
 /// <summary>
 /// Represents a class that searches for local repositories within specified root directories.

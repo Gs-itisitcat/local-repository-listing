@@ -1,5 +1,5 @@
 ﻿using System.Collections.ObjectModel;
-namespace ListLocalRepositories;
+namespace LocalRepositoryListing.Searcher;
 
 /// <summary>
 /// Represents a searcher that can search for repositories based on specified criteria.
