@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+
 namespace LocalRepositoryListing.Searcher;
 
 /// <summary>

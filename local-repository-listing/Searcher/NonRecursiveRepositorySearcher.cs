@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using Microsoft.Extensions.FileSystemGlobbing;
+
 namespace LocalRepositoryListing.Searcher;
 
 /// <summary>
@@ -17,7 +18,11 @@ public class NonRecursiveRepositorySearcher : ISearcher
         IgnoreInaccessible = true,
         MatchType = MatchType.Simple,
         ReturnSpecialDirectories = false,
-        AttributesToSkip = FileAttributes.System | FileAttributes.Compressed | FileAttributes.Offline | FileAttributes.Temporary | FileAttributes.ReparsePoint,
+        AttributesToSkip = FileAttributes.System
+                        | FileAttributes.Compressed
+                        | FileAttributes.Offline
+                        | FileAttributes.Temporary
+                        | FileAttributes.ReparsePoint,
     };
 
     /// <summary>
@@ -49,8 +54,14 @@ public class NonRecursiveRepositorySearcher : ISearcher
     /// <returns><c>true</c> if the directory matches the exclusion criteria; otherwise, <c>false</c>.</returns>
     private bool IsMatchExclude(DirectoryInfo directoryInfo)
     {
-        return directoryInfo.FullName.Split(Path.DirectorySeparatorChar).Any(p => _nameMatcher.Match(p).HasMatches)
-        || ExcludePaths.Any(p => directoryInfo.FullName.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Contains(p));
+        return directoryInfo.FullName
+                .Split(Path.DirectorySeparatorChar)
+                .Any(p => _nameMatcher.Match(p).HasMatches)
+        || ExcludePaths
+            .Any(p => directoryInfo.FullName
+                            .Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                            .Contains(p)
+                );
     }
 
     public ParallelQuery<DirectoryInfo> Search(CancellationToken cancellationToken)
