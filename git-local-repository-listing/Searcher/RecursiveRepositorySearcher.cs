@@ -40,8 +40,17 @@ public class RecursiveRepositorySearcher : ISearcher
     /// <returns><c>true</c> if the directory matches the exclusion criteria; otherwise, <c>false</c>.</returns>
     private bool IsMatchExclude(DirectoryInfo directoryInfo)
     {
-        return directoryInfo.FullName.Split(Path.DirectorySeparatorChar).Any(p => _nameMatcher.Match(p).HasMatches)
-        || ExcludePaths.Any(p => directoryInfo.FullName.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Contains(p));
+        return directoryInfo
+                .FullName
+                .Split(Path.DirectorySeparatorChar)
+                .Where(p => !string.IsNullOrEmpty(p))
+                .Any(p => _nameMatcher.Match(p).HasMatches)
+        || ExcludePaths
+            .Any(p => directoryInfo
+                            .FullName
+                            .Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                            .Contains(p)
+                );
     }
 
     /// <summary>
