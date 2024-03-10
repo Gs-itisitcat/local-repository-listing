@@ -12,6 +12,11 @@ Download from [Release](https://github.com/Gs-itisitcat/git-local-repository-lis
 source /path/to/lepos.bash
 ```
 
+## Dependencies
+
+- Fuzzy finder for selection (currently only fzf is supported)
+- .NET 8 runtime (only when using the runtime dependent version)
+
 ## Command
 
 ```bash

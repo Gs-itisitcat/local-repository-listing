@@ -15,6 +15,11 @@ PATHを通したのち、lepos.bashを.bashrcなどにsourceしてください�
 source /path/to/lepos.bash
 ```
 
+## 依存関係
+
+- 選択に使用するfuzzy finder (現在はfzfのみ対応)
+- .NET 8 runtime (runtime dependent版使用時のみ)
+
 ## コマンド
 
 ```bash
