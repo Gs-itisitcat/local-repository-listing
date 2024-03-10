@@ -9,7 +9,7 @@ List git local repository on your computer.
 ## インストール
 
 [Release](https://github.com/Gs-itisitcat/git-local-repository-listing/releases)からダウンロードして、任意のディレクトリに配置してください。
-PATHを通したのち、lepos.bashを.bashrcなどにsourceしてください。
+lepolにPATHを通したのち、lepos.bashを.bashrcなどにsourceしてください。
 
 ```bash
 source /path/to/lepos.bash
@@ -31,7 +31,7 @@ lepos [options] [query]
 
 ### flags
 
-- --root/-r: 検索するディレクトリパス
+- --root/-r: 検索するディレクトリパス。指定しない場合は全ドライブのルートから再帰的に検索
 - --non-recursive/-n: 再帰的に検索しない
 - --list-only/-l: 検索結果の出力のみ
 - --exclude-name/-e: 検索対象から除外するディレクトリ名 (複数指定可)
