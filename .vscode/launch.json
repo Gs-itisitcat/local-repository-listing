@@ -8,7 +8,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/git-local-repository-listing/bin/Debug/net8.0/lepol.dll",
+      "program": "${workspaceFolder}/local-repository-listing/bin/Debug/net8.0/lepol.dll",
       "args": [ "-l" ],
       "cwd": "${workspaceFolder}",
       "stopAtEntry": false,

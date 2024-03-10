@@ -1,4 +1,4 @@
-# git-local-repository-listing
+# local-repository-listing
 
 JA | [EN](README-en.md)
 
@@ -8,7 +8,7 @@ List git local repository on your computer.
 
 ## インストール
 
-[Release](https://github.com/Gs-itisitcat/git-local-repository-listing/releases)からダウンロードして、任意のディレクトリに配置してください。
+[Release](https://github.com/Gs-itisitcat/local-repository-listing/releases)からダウンロードして、任意のディレクトリに配置してください。
 lepolにPATHを通したのち、lepos.bashを.bashrcなどにsourceしてください。
 
 ```bash

@@ -1,4 +1,4 @@
-# git-local-repository-listing
+# local-repository-listing
 
 [JA](README.md) | EN
 
@@ -6,7 +6,7 @@ This tool searches for git repositories on your local computer, selects them usi
 
 ## Installation
 
-Download from [Release](https://github.com/Gs-itisitcat/git-local-repository-listing/releases) and place it in any directory. After adding lepol to your PATH, source lepos.bash in .bashrc or similar.
+Download from [Release](https://github.com/Gs-itisitcat/local-repository-listing/releases) and place it in any directory. After adding lepol to your PATH, source lepos.bash in .bashrc or similar.
 
 ```bash
 source /path/to/lepos.bash
