@@ -34,3 +34,26 @@ lepos [options] [query]
 - --exclude-name/-e: Specify the directory name to exclude from the search (multiple can be specified).
 - --exclude-path/-ep: Specify the directory path to exclude from the search (multiple can be specified).
 - --fuzzy-finder-args/-a: Specify arguments to pass to fzf (multiple can be specified).
+
+## Fuzzy Finder Args
+
+The default arguments passed to fzf are set.
+
+```bash
+
+fzf --ansi --header "\"Select a git repository\"" --reverse --preview "git -C {} branch  --color=always -a" --preview-window "right:30%" --bind "ctrl-]:change-preview-window(70%|30%)" --bind "?:preview:git -C {} log --color=always --graph --all --pretty=format:'%C(auto)%<(30,trunc)%s %C(cyan)%cr %C(auto)%d' " --bind "alt-?:preview:git -C {} branch  --color=always -a "
+
+```
+
+If you want to add arguments to fzf, use `--fuzzy-finder-args`.
+
+```bash
+lepos --fuzzy-finder-args "--no-reverse"
+```
+
+### Preview Window
+
+The default preview window is set to displays a list of branches in the repository. \
+You can also view the commit log by pressing `?` (`shift-/`). \
+You can also view the branch list by pressing `alt-?` (`alt-shift-/`).
+You can change the size of the preview window by pressing `ctrl-]`.

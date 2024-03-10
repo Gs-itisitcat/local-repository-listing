@@ -37,3 +37,27 @@ lepos [options] [query]
 - --exclude-name/-e: 検索対象から除外するディレクトリ名 (複数指定可)
 - --exclude-path/-ep: 検索対象から除外するディレクトリパス (複数指定可)
 - --fuzzy-finder-args/-a: fzfに渡す引数 (複数指定可)
+
+## fuzzy finder args
+
+デフォルトでfzfに渡す引数を設定しています。
+
+```bash
+
+fzf --ansi --header "\"Select a git repository\"" --reverse --preview "git -C {} branch  --color=always -a" --preview-window "right:30%" --bind "ctrl-]:change-preview-window(70%|30%)" --bind "?:preview:git -C {} log --color=always --graph --all --pretty=format:'%C(auto)%<(30,trunc)%s %C(cyan)%cr %C(auto)%d' " --bind "alt-?:preview:git -C {} branch  --color=always -a "
+
+```
+
+fzfへの引数を追加する場合は、`--fuzzy-finder-args`を使用してください。
+
+```bash
+lepos --fuzzy-finder-args "--no-reverse"
+```
+
+### preview window
+
+デフォルトでpreview windowを設定しています。\
+レポジトリのブランチ一覧を表示します。\
+`?`(`shift-/`)でコミットログに切り替えることができます。\
+`alt-?`( `shift-alt-/`)で再度ブランチ一覧に切り替えることができます。\
+`ctrl-]`でpreview windowのサイズを変更できます。
