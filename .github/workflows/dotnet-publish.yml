@@ -57,10 +57,10 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            lepol-windows-runtime-dependent-${{ steps.get_version.outputs.VERSION }}.zip
-            lepol-windows-self-contained-${{ steps.get_version.outputs.VERSION }}.zip
-            lepol-linux-runtime-dependent-${{ steps.get_version.outputs.VERSION }}.zip
-            lepol-linux-self-contained-${{ steps.get_version.outputs.VERSION }}.zip
+            lepol-windows-x64-runtime-dependent-${{ steps.get_version.outputs.VERSION }}.zip
+            lepol-windows-x64-self-contained-${{ steps.get_version.outputs.VERSION }}.zip
+            lepol-linux-x64-runtime-dependent-${{ steps.get_version.outputs.VERSION }}.zip
+            lepol-linux-x64-self-contained-${{ steps.get_version.outputs.VERSION }}.zip
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: v${{ steps.get_version.outputs.VERSION }}
           name: Release v${{ steps.get_version.outputs.VERSION }}
