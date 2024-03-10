@@ -1,7 +1,7 @@
 # Source this file in your .bashrc or .bash_profile
 function lepos {
-    if [[ "$@" == *"-l"* ]] || [[ "$@" == *"--list-only"* ]]; then
-        lepol -e "Windows.old*" "$@"
+    if [[ "$@" == *"-l"* ]] || [[ "$@" == *"--list-only"* ]] || [[ "$@" == *"-h"* ]] || [[ "$@" == *"--help"* ]]; then
+        lepol "$@"
     else
         local path
         path=$(lepol "$@")
