@@ -9,7 +9,7 @@ List git local repository on your computer.
 ## インストール
 
 [Release](https://github.com/Gs-itisitcat/git-local-repository-listing/releases)からダウンロードして、任意のディレクトリに配置してください。
-lepos.bashを.bashrcなどにsourceしてください。
+PATHを通したのち、lepos.bashを.bashrcなどにsourceしてください。
 
 ```bash
 source /path/to/lepos.bash
