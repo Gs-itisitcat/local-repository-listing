@@ -25,44 +25,40 @@ jobs:
         run: dotnet restore
 
       - name: Get the version
-        id: get_version
         run: |
-          VERSION=$(grep '<Version>' git-local-repository-listing/git-local-repository-listing.csproj | head -1 | awk -F'[<>]' '{print $3}')
-          echo "Version: $VERSION"
-          echo "::set-output name=VERSION::$VERSION"
-        shell: bash
+          echo "VERSION=$(grep '<Version>' git-local-repository-listing/git-local-repository-listing.csproj | head -1 | awk -F'[<>]' '{print $3}')" >> $GITHUB_ENV
 
       - name: Publish Windows x64 Runtime Dependent
         run: |
           dotnet publish git-local-repository-listing/git-local-repository-listing.csproj --configuration Release --output publish/windows-runtime-dependent --runtime win-x64 --self-contained false
-          zip -r -j lepol-windows-x64-runtime-dependent-${{ steps.get_version.outputs.VERSION }}.zip publish/windows-runtime-dependent src/lepos.bash
+          zip -r -j lepol-windows-x64-runtime-dependent-${{ env.VERSION }}.zip publish/windows-runtime-dependent src/lepos.bash
 
       - name: Publish Windows x64 Self-Contained
         run: |
           dotnet publish git-local-repository-listing/git-local-repository-listing.csproj --configuration Release --output publish/windows-self-contained --runtime win-x64 --self-contained true
-          zip -r -j lepol-windows-x64-self-contained-${{ steps.get_version.outputs.VERSION }}.zip publish/windows-self-contained src/lepos.bash
+          zip -r -j lepol-windows-x64-self-contained-${{ env.VERSION }}.zip publish/windows-self-contained src/lepos.bash
 
       - name: Publish Linux x64 Runtime Dependent
         run: |
           dotnet publish git-local-repository-listing/git-local-repository-listing.csproj --configuration Release --output publish/linux-runtime-dependent --runtime linux-x64 --self-contained false
-          zip -r -j lepol-linux-x64-runtime-dependent-${{ steps.get_version.outputs.VERSION }}.zip publish/linux-runtime-dependent src/lepos.bash
+          zip -r -j lepol-linux-x64-runtime-dependent-${{ env.VERSION }}.zip publish/linux-runtime-dependent src/lepos.bash
 
       - name: Publish Linux x64 Self-Contained
         run: |
           dotnet publish git-local-repository-listing/git-local-repository-listing.csproj --configuration Release --output publish/linux-self-contained --runtime linux-x64 --self-contained true
-          zip -r -j lepol-linux-x64-self-contained-${{ steps.get_version.outputs.VERSION }}.zip publish/linux-self-contained src/lepos.bash
+          zip -r -j lepol-linux-x64-self-contained-${{ env.VERSION }}.zip publish/linux-self-contained src/lepos.bash
 
 
       - name: Release with action-gh-release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            lepol-windows-x64-runtime-dependent-${{ steps.get_version.outputs.VERSION }}.zip
-            lepol-windows-x64-self-contained-${{ steps.get_version.outputs.VERSION }}.zip
-            lepol-linux-x64-runtime-dependent-${{ steps.get_version.outputs.VERSION }}.zip
-            lepol-linux-x64-self-contained-${{ steps.get_version.outputs.VERSION }}.zip
+            lepol-windows-x64-runtime-dependent-${{ env.VERSION }}.zip
+            lepol-windows-x64-self-contained-${{ env.VERSION }}.zip
+            lepol-linux-x64-runtime-dependent-${{ env.VERSION }}.zip
+            lepol-linux-x64-self-contained-${{ env.VERSION }}.zip
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: v${{ steps.get_version.outputs.VERSION }}
-          name: Release v${{ steps.get_version.outputs.VERSION }}
+          tag_name: v${{ env.VERSION }}
+          name: Release v${{ env.VERSION }}
           draft: false
           prerelease: false
