@@ -6,7 +6,10 @@ function lepos {
         local path
         path=$(lepol "$@")
         status=$?
-        if [[ $status -ne 0 ]]; then
+        if [[ $status -eq 130 ]]; then
+            echo "No repository selected."
+            return 0
+        elif [[ $status -ne 0 ]]; then
             echo "lepol failed with status $status"
             echo $path
             return $status
