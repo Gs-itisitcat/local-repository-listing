@@ -35,7 +35,9 @@ jobs:
       - name: Publish Runtime Dependent Any
         run: |
           dotnet publish git-local-repository-listing/git-local-repository-listing.csproj --configuration Release --output publish/runtime-dependent-any --self-contained false -p:PublishSingleFile=false
-          zip -r -j lepol-any-runtime-dependent-${{ steps.get_version.outputs.VERSION }}.zip publish/runtime-dependent-any src/lepos.bash
+          zip -r lepol-any-runtime-dependent-${{ steps.get_version.outputs.VERSION }}.zip publish/runtime-dependent-any
+          zip -j lepol-any-runtime-dependent-${{ steps.get_version.outputs.VERSION }}.zip src/lepos.bash
+          
 
       - name: Publish Windows Runtime Dependent
         run: |
