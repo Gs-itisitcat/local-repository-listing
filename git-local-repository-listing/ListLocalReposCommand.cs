@@ -35,7 +35,7 @@ public class LocalRepositoryListingCommand : ConsoleAppBase
     /// <param name="fuzzyFinderArgs">Arguments to pass to the fuzzy finder process.</param>
     /// <returns>The result of the command execution.</returns>
     [RootCommand]
-    public int Execute(
+    public int Lepol(
         [Option(0, ArgumentDescription)] string arg = "",
         [Option("r", RootDescription)] string root = "",
         [Option("l", ListOnlyDescription)] bool listOnly = false,

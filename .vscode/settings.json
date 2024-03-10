@@ -1,3 +1,6 @@
 {
-    "dotnet.defaultSolution": "git-local-repository-listing.sln"
+    "dotnet.defaultSolution": "git-local-repository-listing.sln",
+    "cSpell.words": [
+      "Lepol"
+    ]
 }
