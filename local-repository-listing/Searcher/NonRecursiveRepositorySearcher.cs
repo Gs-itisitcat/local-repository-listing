@@ -56,6 +56,7 @@ public class NonRecursiveRepositorySearcher : ISearcher
     {
         return directoryInfo.FullName
                 .Split(Path.DirectorySeparatorChar)
+                .Where(p => !string.IsNullOrEmpty(p))
                 .Any(p => _nameMatcher.Match(p).HasMatches)
         || ExcludePaths
             .Any(p => directoryInfo.FullName
