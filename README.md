@@ -6,10 +6,14 @@ List git local repository on your computer.
 
 ローカルにあるgitリポジトリを検索し、fazzy finderで選択して移動するツール
 
+リポジトリを検索し、fuzzy finderに渡すlepol(local repository listing)コマンドと、`lepol`から結果を受け取り`cd`するlepos(local repository switch)シェル関数を提供します。
+
 ## インストール
 
-[Release](https://github.com/Gs-itisitcat/local-repository-listing/releases)からダウンロードして、任意のディレクトリに配置してください。
-lepolにPATHを通したのち、lepos.bashを.bashrcなどにsourceしてください。
+- [Release](https://github.com/Gs-itisitcat/local-repository-listing/releases)からダウンロード
+- 任意のディレクトリに解凍
+- lepolまでのPATHを通す
+- .bashrcなどでlepos.bashをsource
 
 ```bash
 source /path/to/lepos.bash
@@ -17,17 +21,17 @@ source /path/to/lepos.bash
 
 ## 依存関係
 
-- 選択に使用するfuzzy finder (現在はfzfのみ対応)
+- 選択に使用するfuzzy finder (現在は[fzf](https://github.com/junegunn/fzf)のみ対応)
 - .NET 8 runtime (runtime dependent版使用時のみ)
 
 ## コマンド
 
 ```bash
-lepos [options] [query]
+lepos [options] [arguments]
 ```
 
 - 引数無し: 全ドライブのルートから再帰的に検索
-- 引数有り: 全ドライブのルートから再帰的に検索し、引数で指定したディレクトリ名を含むリポジトリをクエリ
+- 引数有り: 全ドライブのルートから再帰的に検索し、引数で指定したディレクトリ名を含むリポジトリをfuzzy finderでクエリ
 
 ### flags
 
@@ -61,3 +65,9 @@ lepos --fuzzy-finder-args "--no-reverse"
 `?`(`shift-/`)でコミットログに切り替えることができます。\
 `alt-?`( `shift-alt-/`)で再度ブランチ一覧に切り替えることができます。\
 `ctrl-]`でpreview windowのサイズを変更できます。
+
+## License
+
+MIT License
+
+詳細は[LICENSE](LICENSE)を参照してください。

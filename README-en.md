@@ -4,9 +4,14 @@
 
 This tool searches for git repositories on your local computer, selects them using a fuzzy finder, and navigates to the selected repository.
 
+Provides the `lepol` (local repository listing) command to search for repositories and pass them to the fuzzy finder, and the `lepos` (local repository switch) shell function to receive the results and `cd` to them.
+
 ## Installation
 
-Download from [Release](https://github.com/Gs-itisitcat/local-repository-listing/releases) and place it in any directory. After adding lepol to your PATH, source lepos.bash in .bashrc or similar.
+- Download from [Release](https://github.com/Gs-itisitcat/local-repository-listing/releases)
+- Unzip to any directory
+- Add the PATH to lepol
+- Source lepos.bash in .bashrc or similar
 
 ```bash
 source /path/to/lepos.bash
@@ -14,17 +19,17 @@ source /path/to/lepos.bash
 
 ## Dependencies
 
-- Fuzzy finder for selection (currently only fzf is supported)
+- Fuzzy finder for selection (currently only [fzf](https://github.com/junegunn/fzf) is supported)
 - .NET 8 runtime (only when using the runtime dependent version)
 
 ## Command
 
 ```bash
-lepos [options] [query]
+lepos [options] [arguments]
 ```
 
 - No arguments: Recursively search from the root of all drives.
-- With arguments: Recursively search from the root of all drives and query repositories containing the directory name specified by the argument.
+- With arguments: Recursively search from the root of all drives and query the repository containing the directory name specified by the argument with the fuzzy finder.
 
 ### Flags
 
