@@ -31,6 +31,9 @@ public class ConsoleOutputProcessor(string searchPattern) : ISearchResultProcess
                     ), searchCancellationTokenSource.Token
             );
 
+            // For immediate cancellation.
+            // This is necessary because the searchTask is not cancelled immediately
+            // when the searchCancellationTokenSource is cancelled by pressing Ctrl+C.
             while (
                 !searchCancellationTokenSource.Token.IsCancellationRequested
                 && !searchTask.IsCompleted
