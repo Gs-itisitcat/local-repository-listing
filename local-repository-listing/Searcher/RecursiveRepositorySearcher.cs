@@ -10,9 +10,9 @@ public class RecursiveRepositorySearcher : ISearcher
 {
     private static readonly string _rootSearchPattern = "*";
     private static readonly string _searchPattern = ".git";
-    public string[] RootDirectories { get; init; }
-    public ReadOnlyCollection<string> ExcludePaths { get; init; }
-    public ReadOnlyCollection<string> ExcludeNames { get; init; }
+    public IReadOnlyCollection<string> RootDirectories { get; init; }
+    public IReadOnlyCollection<string> ExcludePaths { get; init; }
+    public IReadOnlyCollection<string> ExcludeNames { get; init; }
 
     private static readonly EnumerationOptions _rootEnumerationOptions = new()
     {
@@ -64,7 +64,7 @@ public class RecursiveRepositorySearcher : ISearcher
     /// Initializes a new instance of the RepositorySearcher class with the specified root directories.
     /// </summary>
     /// <param name="rootDirectories">An array of root directories to search for repositories.</param>
-    public RecursiveRepositorySearcher(string[] rootDirectories) : this(rootDirectories, [], []) { }
+    public RecursiveRepositorySearcher(IList<string> rootDirectories) : this(rootDirectories, [], []) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RecursiveRepositorySearcher"/> class.
@@ -72,9 +72,9 @@ public class RecursiveRepositorySearcher : ISearcher
     /// <param name="rootDirectories">The root directories to search in.</param>
     /// <param name="excludePaths">The paths to exclude from the search.</param>
     /// <param name="excludeNames">The names to exclude from the search.</param>
-    public RecursiveRepositorySearcher(string[] rootDirectories, string[] excludePaths, string[] excludeNames)
+    public RecursiveRepositorySearcher(IList<string> rootDirectories, IList<string> excludePaths, IList<string> excludeNames)
     {
-        RootDirectories = rootDirectories;
+        RootDirectories = rootDirectories.AsReadOnly();
         ExcludePaths = excludePaths.AsReadOnly();
         ExcludeNames = excludeNames.AsReadOnly();
         _nameMatcher.AddIncludePatterns(excludeNames);
