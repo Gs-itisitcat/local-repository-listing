@@ -1,6 +1,13 @@
-﻿namespace LocalRepositoryListing.ResultProcessor;
+﻿using LocalRepositoryListing.Searcher;
 
-public class FZFProcessor(string? searchPattern, string[] args) : FuzzyFinderProcessorBase(arguments: [
+namespace LocalRepositoryListing.ResultProcessor;
+
+/// <summary>
+/// Represents the processor for the FZF fuzzy finder.
+/// </summary>
+/// <seealso cref="FuzzyFinderListerBase" />
+/// <seealso cref="IResultLister" />
+public class FZFLister(ISearcher searcher, string? searchPattern, string[] args) : FuzzyFinderListerBase(searcher, arguments: [
             "--ansi",
             "--header",
             "\"Select a git repository\"",
@@ -18,7 +25,7 @@ public class FZFProcessor(string? searchPattern, string[] args) : FuzzyFinderPro
             "--query",
             $"{(string.IsNullOrWhiteSpace(searchPattern) ? "\"\"" : searchPattern)}",
             ..args
-    ])
+    ]), IResultLister
 {
     private static readonly string _fuzzyFinderName = "fzf";
     public override string FuzzyFinderName => _fuzzyFinderName;

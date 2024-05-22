@@ -35,7 +35,7 @@ public class LocalRepositoryListingCommand : ConsoleAppBase
     /// <param name="fuzzyFinderArgs">Arguments to pass to the fuzzy finder process.</param>
     /// <returns>The result of the command execution.</returns>
     [RootCommand]
-    public int Lepol(
+    public async ValueTask<int> Lepol(
         [Option(0, ArgumentDescription)] string arg = "",
         [Option("r", RootDescription)] string root = "",
         [Option("l", ListOnlyDescription)] bool listOnly = false,
@@ -52,15 +52,11 @@ public class LocalRepositoryListingCommand : ConsoleAppBase
             ? new NonRecursiveRepositorySearcher(rootDirectories, excludePaths ?? [], excludeNames ?? [])
             : new RecursiveRepositorySearcher(rootDirectories, excludePaths ?? [], excludeNames ?? []);
 
-        ISearchResultProcessor processor = listOnly
-            ? new ConsoleOutputProcessor(arg)
-            : new FZFProcessor(arg, fuzzyFinderArgs ?? []);
+        IResultLister listable = listOnly
+            ? new ConsoleOutputLister(searcher, arg)
+            : new FZFLister(searcher, arg, fuzzyFinderArgs ?? []);
 
 
-        // Pass the cancellation token source of search cancellation token to the fuzzy finder process
-        // to cancel the search when the fuzzy finder process is terminated.
-        var cts = new CancellationTokenSource();
-        Context.CancellationToken.Register(cts.Cancel);
-        return processor.ProcessSearchResult(searcher.Search(cts.Token), cts);
+        return await listable.ExecuteListing(Context.CancellationToken);
     }
 }

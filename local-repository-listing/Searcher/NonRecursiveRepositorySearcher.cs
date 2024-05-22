@@ -1,17 +1,19 @@
-﻿using Microsoft.Extensions.FileSystemGlobbing;
+﻿using R3;
 
 namespace LocalRepositoryListing.Searcher;
 
 /// <summary>
 /// Represents a class that searches for local repositories within specified root directories.
 /// </summary>
-public class NonRecursiveRepositorySearcher : ISearcher
+/// <remarks>
+/// Initializes a new instance of the <see cref="NonRecursiveRepositorySearcher"/> class.
+/// </remarks>
+/// <param name="rootDirectories">The root directories to search in.</param>
+/// <param name="excludePaths">The paths to exclude from the search.</param>
+/// <param name="excludeNames">The names to exclude from the search.</param>
+public class NonRecursiveRepositorySearcher(IList<string> rootDirectories, IList<string> excludePaths, IList<string> excludeNames) : DirectorySearcherBase(rootDirectories, excludePaths, excludeNames), ISearcher
 {
-    public IReadOnlyCollection<string> RootDirectories { get; init; }
-    public IReadOnlyCollection<string> ExcludePaths { get; init; }
-    public IReadOnlyCollection<string> ExcludeNames { get; init; }
-
-    private static readonly EnumerationOptions _enumerationOptions = new()
+    protected override EnumerationOptions EnumerationOptions { get; } = new()
     {
         RecurseSubdirectories = false,
         IgnoreInaccessible = true,
@@ -30,48 +32,19 @@ public class NonRecursiveRepositorySearcher : ISearcher
     /// <param name="rootDirectories">An array of root directories to search for repositories.</param>
     public NonRecursiveRepositorySearcher(IList<string> rootDirectories) : this(rootDirectories, [], []) { }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="NonRecursiveRepositorySearcher"/> class.
-    /// </summary>
-    /// <param name="rootDirectories">The root directories to search in.</param>
-    /// <param name="excludePaths">The paths to exclude from the search.</param>
-    /// <param name="excludeNames">The names to exclude from the search.</param>
-    public NonRecursiveRepositorySearcher(IList<string> rootDirectories, IList<string> excludePaths, IList<string> excludeNames)
+    public override Task Search(CancellationToken cancellationToken)
     {
-        RootDirectories = rootDirectories.AsReadOnly();
-        ExcludePaths = excludePaths.AsReadOnly();
-        ExcludeNames = excludeNames.AsReadOnly();
-        _nameMatcher.AddIncludePatterns(excludeNames);
-    }
+        // Somehow cancelled or exited faster by wrapping in Task.Run
+        return Task.Run(() =>
+            RootDirectories
+            .AsParallel()
+            .WithCancellation(cancellationToken)
+            .SelectMany(d => Directory.EnumerateDirectories(d, _rootSearchPattern, EnumerationOptions))
+            .Select(d => new DirectoryInfo(d))
+            .Where(d => d.GetDirectories(_searchPattern, SearchOption.TopDirectoryOnly).Length != 0)
+            .Where(d => !IsMatchExclude(d))
+            .ForAll(_searchResults.OnNext)
+        , cancellationToken);
 
-    private readonly Matcher _nameMatcher = new();
-
-    /// <summary>
-    /// Determines if the specified directory matches the exclusion criteria.
-    /// </summary>
-    /// <param name="directoryInfo">The <see cref="DirectoryInfo"/> object representing the directory to check.</param>
-    /// <returns><c>true</c> if the directory matches the exclusion criteria; otherwise, <c>false</c>.</returns>
-    private bool IsMatchExclude(DirectoryInfo directoryInfo)
-    {
-        return directoryInfo.FullName
-                .Split(Path.DirectorySeparatorChar)
-                .Where(p => !string.IsNullOrEmpty(p))
-                .Any(p => _nameMatcher.Match(p).HasMatches)
-        || ExcludePaths
-            .Any(p => directoryInfo.FullName
-                            .Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-                            .Contains(p)
-                );
-    }
-
-    public ParallelQuery<DirectoryInfo> Search(CancellationToken cancellationToken)
-    {
-        return RootDirectories
-        .AsParallel()
-        .WithCancellation(cancellationToken)
-        .SelectMany(d => Directory.EnumerateDirectories(d, "*", _enumerationOptions))
-        .Select(d => new DirectoryInfo(d))
-        .Where(d => d.GetDirectories(".git", SearchOption.TopDirectoryOnly).Any())
-        .Where(d => !IsMatchExclude(d));
     }
 }
