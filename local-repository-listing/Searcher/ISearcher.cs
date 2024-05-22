@@ -5,16 +5,6 @@
 public interface ISearcher
 {
     /// <summary>
-    /// Gets the root directories to search in.
-    /// </summary>
-    public IReadOnlyCollection<string> RootDirectories { get; }
-
-    /// <summary>
-    /// Gets the paths to exclude from the search.
-    /// </summary>
-    public IReadOnlyCollection<string> ExcludePaths { get; }
-
-    /// <summary>
     /// Gets the directory names to exclude from the search.
     /// </summary>
     public IReadOnlyCollection<string> ExcludeNames { get; }
