@@ -48,19 +48,23 @@ public class RecursiveRepositorySearcher(IList<string> rootDirectories, IList<st
     /// </summary>
     public RecursiveRepositorySearcher() : this(Environment.GetLogicalDrives()) { }
 
-    public override ParallelQuery<DirectoryInfo> Search(CancellationToken cancellationToken)
+    public override Task Search(CancellationToken cancellationToken)
     {
-        return RootDirectories
-        .AsParallel()
-        .WithCancellation(cancellationToken)
-        .SelectMany(d => Directory.EnumerateDirectories(d, _rootSearchPattern, _rootEnumerationOptions))
-        .AsParallel() // Somehow faster with this additional AsParallel()
-        .WithCancellation(cancellationToken)
-        .Where(d => !IsMatchExclude(new DirectoryInfo(d)))
-        .SelectMany(d => Directory.EnumerateDirectories(d, _searchPattern, EnumerationOptions))
-        .Select(d => Directory.GetParent(d))
-        .Where(d => d != null)
-        .Select(d => d ?? throw new InvalidOperationException("Directory.GetParent returns null"))
-        .Where(d => !IsMatchExclude(d));
+        // Somehow Cancelled faster by wrapping in Task.Run
+        return Task.Run(() =>
+            RootDirectories
+            .AsParallel()
+            .WithCancellation(cancellationToken)
+            .SelectMany(d => Directory.EnumerateDirectories(d, _rootSearchPattern, _rootEnumerationOptions))
+            .AsParallel() // Somehow faster with this additional AsParallel()
+            .WithCancellation(cancellationToken)
+            .Where(d => !IsMatchExclude(new DirectoryInfo(d)))
+            .SelectMany(d => Directory.EnumerateDirectories(d, _searchPattern, EnumerationOptions))
+            .Select(d => Directory.GetParent(d))
+            .Where(d => d != null)
+            .Select(d => d ?? throw new InvalidOperationException("Directory.GetParent returns null"))
+            .Where(d => !IsMatchExclude(d))
+            .ForAll(_searchResults.OnNext)
+        , cancellationToken);
     }
 }
