@@ -1,4 +1,4 @@
-using LocalRepositoryListing.Searcher;
+﻿using LocalRepositoryListing.Searcher;
 using LocalRepositoryListing.ResultProcessor;
 
 namespace LocalRepositoryListing.Command;
@@ -47,10 +47,12 @@ public class LocalRepositoryListingCommand : ConsoleAppBase
     {
         var rootDirectories = string.IsNullOrEmpty(root) ? Environment.GetLogicalDrives() : [root];
 
+        ISearcher searcher = new EnumerateDirectorySearcher(rootDirectories, excludePaths ?? [], excludeNames ?? [])
+        {
+            RecurseSubdirectories = !nonRecursive,
+        };
 
-        ISearcher searcher = nonRecursive
-            ? new NonRecursiveRepositorySearcher(rootDirectories, excludePaths ?? [], excludeNames ?? [])
-            : new RecursiveRepositorySearcher(rootDirectories, excludePaths ?? [], excludeNames ?? []);
+
 
         IResultLister listable = listOnly
             ? new ConsoleOutputLister(searcher, arg)
