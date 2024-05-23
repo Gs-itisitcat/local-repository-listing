@@ -1,6 +1,4 @@
-﻿
-using Microsoft.Extensions.FileSystemGlobbing;
-using R3;
+﻿using R3;
 
 namespace LocalRepositoryListing.Searcher;
 
@@ -27,8 +25,6 @@ public abstract class DirectorySearcherBase : ISearcher
     /// </summary>
     public IReadOnlyCollection<string> ExcludeNames { get; }
 
-    private readonly Matcher _nameMatcher = new();
-
     /// <summary>
     /// Initializes a new instance of the <see cref="DirectorySearcherBase"/> class with the specified root directories, paths to exclude, and names to exclude.
     /// </summary>
@@ -40,7 +36,6 @@ public abstract class DirectorySearcherBase : ISearcher
         RootDirectories = rootDirectories.AsReadOnly();
         ExcludePaths = excludePaths.AsReadOnly();
         ExcludeNames = excludeNames.AsReadOnly();
-        _nameMatcher.AddIncludePatterns(excludeNames);
         SearchResults = _searchResults;
     }
 
@@ -49,24 +44,6 @@ public abstract class DirectorySearcherBase : ISearcher
     /// Gets the enumeration options for the search.
     /// </summary>
     protected abstract EnumerationOptions EnumerationOptions { get; }
-
-    /// <summary>
-    /// Determines if the specified directory matches the exclusion criteria.
-    /// </summary>
-    /// <param name="directoryInfo">The <see cref="DirectoryInfo"/> object representing the directory to check.</param>
-    /// <returns><c>true</c> if the directory matches the exclusion criteria; otherwise, <c>false</c>.</returns>
-    protected bool IsMatchExclude(DirectoryInfo directoryInfo)
-    {
-        return directoryInfo.FullName
-                .Split(Path.DirectorySeparatorChar)
-                .Where(p => !string.IsNullOrEmpty(p))
-                .Any(p => _nameMatcher.Match(p).HasMatches)
-        || ExcludePaths
-            .Any(p => directoryInfo.FullName
-                            .Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-                            .Contains(p)
-                );
-    }
 
     public abstract Task Search(CancellationToken cancellationToken);
 }

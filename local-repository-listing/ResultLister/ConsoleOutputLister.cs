@@ -19,7 +19,7 @@ public class ConsoleOutputLister(ISearcher searcher, string searchPattern) : IRe
     {
         using var searchSubscription = _searcher.SearchResults.Subscribe(d =>
         {
-            var fullName = d.FullName.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            var fullName = d.GetNormalizedPath();
 
             if (string.IsNullOrEmpty(fullName) || (!string.IsNullOrEmpty(_searchPattern) && !fullName.Contains(_searchPattern)))
             {

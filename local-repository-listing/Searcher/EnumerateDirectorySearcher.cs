@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using R3;
+using static LocalRepositoryListing.Searcher.DirectoryUtility;
 
 namespace LocalRepositoryListing.Searcher;
 
@@ -65,7 +66,7 @@ public class EnumerateDirectorySearcher(IList<string> rootDirectories, IList<str
                     true => InsideRootDirectories
                     .AsParallel() // Somehow faster with this additional AsParallel()
                     .WithCancellation(cancellationToken)
-                    .Where(d => !IsMatchExclude(new DirectoryInfo(d)))
+                    .Where(d => !IsMatchExclude(new DirectoryInfo(d), ExcludePaths, ExcludeNames))
                     .SelectMany(d => Directory.EnumerateDirectories(d, _searchPattern, _recursiveEnumerationOptions))
                     .Select(d => Directory.GetParent(d))
                     .Where(d => d != null)
@@ -77,7 +78,7 @@ public class EnumerateDirectorySearcher(IList<string> rootDirectories, IList<str
                 };
 
                 hitDirectories
-                .Where(d => !IsMatchExclude(d))
+                .Where(d => !IsMatchExclude(d, ExcludePaths, ExcludeNames))
                 .ForAll(_searchResults.OnNext);
 
                 _searchResults.OnCompleted(Result.Success);

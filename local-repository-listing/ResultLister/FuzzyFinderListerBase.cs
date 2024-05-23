@@ -61,7 +61,7 @@ public abstract class FuzzyFinderListerBase : IResultLister
             return 1;
         }
 
-        using var searchSubscription = _searcher.SearchResults.Subscribe(d => input.WriteLine(d.FullName.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)));
+        using var searchSubscription = _searcher.SearchResults.Subscribe(d => input.WriteLine(d.GetNormalizedPath()));
 
         // Suppress the cancellation exceptions to exit quickly
         _ = _searcher.Search(cancellationToken);
