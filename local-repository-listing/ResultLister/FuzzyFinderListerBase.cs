@@ -45,28 +45,28 @@ public abstract class FuzzyFinderListerBase : IResultLister
         _searcher = searcher;
     }
 
-    public ValueTask<int> ExecuteListing(CancellationToken cancellationToken)
+    public async ValueTask<int> ExecuteListingAsync(CancellationToken cancellationToken)
     {
         using var process = Process.Start(_processStartInfo);
         if (process == null)
         {
             Console.Error.WriteLine($"Failed to start {FuzzyFinderName}");
-            return ValueTask.FromResult(1);
+            return 1;
         }
 
         using var input = TextWriter.Synchronized(process.StandardInput);
         if (input == null)
         {
             Console.Error.WriteLine($"Failed to get StandardInput of {FuzzyFinderName}");
-            return ValueTask.FromResult(1);
+            return 1;
         }
 
         using var searchSubscription = _searcher.SearchResults.Subscribe(d => input.WriteLine(d.FullName.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)));
 
+        // Suppress the cancellation exceptions to exit quickly
         _ = _searcher.Search(cancellationToken);
 
-        process.WaitForExit();
-
-        return ValueTask.FromResult(process.ExitCode);
+        await process.WaitForExitAsync(cancellationToken);
+        return process.ExitCode;
     }
 }

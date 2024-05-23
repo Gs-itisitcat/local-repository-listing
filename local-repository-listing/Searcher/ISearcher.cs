@@ -17,6 +17,11 @@ public interface ISearcher
     public IReadOnlyCollection<string> ExcludeNames { get; }
 
     /// <summary>
+    /// Gets the paths to exclude from the search.
+    /// </summary>
+    public IReadOnlyCollection<string> ExcludePaths { get; }
+
+    /// <summary>
     /// Searches for repositories based on the specified criteria.
     /// </summary>
     /// <param name="cancellationToken">A cancellation token to cancel the search operation.</param>

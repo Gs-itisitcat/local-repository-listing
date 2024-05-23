@@ -1,4 +1,4 @@
-﻿using LocalRepositoryListing.Searcher;
+using LocalRepositoryListing.Searcher;
 using LocalRepositoryListing.ResultProcessor;
 
 namespace LocalRepositoryListing.Command;
@@ -56,7 +56,8 @@ public class LocalRepositoryListingCommand : ConsoleAppBase
             ? new ConsoleOutputLister(searcher, arg)
             : new FZFLister(searcher, arg, fuzzyFinderArgs ?? []);
 
+        var exitCode = await listable.ExecuteListingAsync(Context.CancellationToken);
 
-        return await listable.ExecuteListing(Context.CancellationToken);
+        return exitCode;
     }
 }

@@ -34,17 +34,26 @@ public class NonRecursiveRepositorySearcher(IList<string> rootDirectories, IList
 
     public override Task Search(CancellationToken cancellationToken)
     {
-        // Somehow cancelled or exited faster by wrapping in Task.Run
         return Task.Run(() =>
-            RootDirectories
-            .AsParallel()
-            .WithCancellation(cancellationToken)
-            .SelectMany(d => Directory.EnumerateDirectories(d, _rootSearchPattern, EnumerationOptions))
-            .Select(d => new DirectoryInfo(d))
-            .Where(d => d.GetDirectories(_searchPattern, SearchOption.TopDirectoryOnly).Length != 0)
-            .Where(d => !IsMatchExclude(d))
-            .ForAll(_searchResults.OnNext)
-        , cancellationToken);
+        {
+            try
+            {
+                RootDirectories
+                .AsParallel()
+                .WithCancellation(cancellationToken)
+                .SelectMany(d => Directory.EnumerateDirectories(d, _rootSearchPattern, EnumerationOptions))
+                .Select(d => new DirectoryInfo(d))
+                .Where(d => d.GetDirectories(_searchPattern, SearchOption.TopDirectoryOnly).Length != 0)
+                .Where(d => !IsMatchExclude(d))
+                .ForAll(_searchResults.OnNext);
+
+                _searchResults.OnCompleted(Result.Success);
+            }
+            catch (OperationCanceledException e)
+            {
+                _searchResults.OnCompleted(Result.Failure(e));
+            }
+        }, cancellationToken);
 
     }
 }

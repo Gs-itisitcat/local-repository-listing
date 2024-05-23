@@ -15,7 +15,7 @@ public class ConsoleOutputLister(ISearcher searcher, string searchPattern) : IRe
     private readonly string _searchPattern = searchPattern;
     private readonly ISearcher _searcher = searcher;
 
-    public async ValueTask<int> ExecuteListing(CancellationToken cancellationToken)
+    public async ValueTask<int> ExecuteListingAsync(CancellationToken cancellationToken)
     {
         using var searchSubscription = _searcher.SearchResults.Subscribe(d =>
         {

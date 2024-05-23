@@ -1,4 +1,7 @@
-﻿namespace LocalRepositoryListing.Searcher;
+﻿using System.Diagnostics;
+using R3;
+
+namespace LocalRepositoryListing.Searcher;
 
 /// <summary>
 /// Represents a class that searches for local repositories within specified root directories.
@@ -50,21 +53,29 @@ public class RecursiveRepositorySearcher(IList<string> rootDirectories, IList<st
 
     public override Task Search(CancellationToken cancellationToken)
     {
-        // Somehow Cancelled faster by wrapping in Task.Run
         return Task.Run(() =>
-            RootDirectories
-            .AsParallel()
-            .WithCancellation(cancellationToken)
-            .SelectMany(d => Directory.EnumerateDirectories(d, _rootSearchPattern, _rootEnumerationOptions))
-            .AsParallel() // Somehow faster with this additional AsParallel()
-            .WithCancellation(cancellationToken)
-            .Where(d => !IsMatchExclude(new DirectoryInfo(d)))
-            .SelectMany(d => Directory.EnumerateDirectories(d, _searchPattern, EnumerationOptions))
-            .Select(d => Directory.GetParent(d))
-            .Where(d => d != null)
-            .Select(d => d ?? throw new InvalidOperationException("Directory.GetParent returns null"))
-            .Where(d => !IsMatchExclude(d))
-            .ForAll(_searchResults.OnNext)
-        , cancellationToken);
+        {
+            try
+            {
+                RootDirectories
+                .AsParallel()
+                .WithCancellation(cancellationToken)
+                .SelectMany(d => Directory.EnumerateDirectories(d, _rootSearchPattern, _rootEnumerationOptions))
+                .AsParallel() // Somehow faster with this additional AsParallel()
+                .WithCancellation(cancellationToken)
+                .Where(d => !IsMatchExclude(new DirectoryInfo(d)))
+                .SelectMany(d => Directory.EnumerateDirectories(d, _searchPattern, EnumerationOptions))
+                .Select(d => Directory.GetParent(d))
+                .Where(d => d != null)
+                .Select(d => d ?? throw new UnreachableException("Parent directories that are null should have already been excluded."))
+                .Where(d => !IsMatchExclude(d))
+                .ForAll(_searchResults.OnNext);
+                _searchResults.OnCompleted(Result.Success);
+            }
+            catch (OperationCanceledException e)
+            {
+                _searchResults.OnCompleted(Result.Failure(e));
+            }
+        }, cancellationToken);
     }
 }
