@@ -1,6 +1,6 @@
 ﻿using LocalRepositoryListing.Searcher;
 
-namespace LocalRepositoryListing.ResultProcessor;
+namespace LocalRepositoryListing.ResultLister;
 
 /// <summary>
 /// Represents the processor for the FZF fuzzy finder.

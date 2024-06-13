@@ -3,7 +3,7 @@ using System.Diagnostics;
 using LocalRepositoryListing.Searcher;
 using R3;
 
-namespace LocalRepositoryListing.ResultProcessor;
+namespace LocalRepositoryListing.ResultLister;
 
 /// <summary>
 /// Represents the base class for a fuzzy finder process.

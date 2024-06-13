@@ -1,3 +1,3 @@
-using LocalRepositoryListing.Command;
+using LocalRepositoryListing;
 
 ConsoleApp.Run<LocalRepositoryListingCommand>(args);

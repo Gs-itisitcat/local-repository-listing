@@ -79,13 +79,13 @@ public class EnumerateDirectorySearcher(IList<string> rootDirectories, IList<str
 
                 hitDirectories
                 .Where(d => !IsMatchExclude(d, ExcludePaths, ExcludeNames))
-                .ForAll(_searchResults.OnNext);
+                .ForAll(_searchSubject.OnNext);
 
-                _searchResults.OnCompleted(Result.Success);
+                _searchSubject.OnCompleted(Result.Success);
             }
             catch (OperationCanceledException e)
             {
-                _searchResults.OnCompleted(Result.Failure(e));
+                _searchSubject.OnCompleted(Result.Failure(e));
             }
         }, cancellationToken);
     }

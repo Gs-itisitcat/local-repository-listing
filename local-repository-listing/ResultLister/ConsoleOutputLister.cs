@@ -1,6 +1,6 @@
 ﻿using LocalRepositoryListing.Searcher;
 using R3;
-namespace LocalRepositoryListing.ResultProcessor;
+namespace LocalRepositoryListing.ResultLister;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="ConsoleOutputLister"/> class with the specified search pattern.

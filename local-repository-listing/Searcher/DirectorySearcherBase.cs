@@ -2,9 +2,10 @@
 
 namespace LocalRepositoryListing.Searcher;
 
-public abstract class DirectorySearcherBase : ISearcher
+public abstract class DirectorySearcherBase : ISearcher, IDisposable
+
 {
-    protected readonly Subject<DirectoryInfo> _searchResults = new();
+    protected readonly Subject<DirectoryInfo> _searchSubject = new();
     protected static readonly string _rootSearchPattern = "*";
     protected static readonly string _searchPattern = ".git";
 
@@ -36,7 +37,7 @@ public abstract class DirectorySearcherBase : ISearcher
         RootDirectories = rootDirectories.AsReadOnly();
         ExcludePaths = excludePaths.AsReadOnly();
         ExcludeNames = excludeNames.AsReadOnly();
-        SearchResults = _searchResults;
+        SearchResults = _searchSubject;
     }
 
 
@@ -46,4 +47,19 @@ public abstract class DirectorySearcherBase : ISearcher
     protected abstract EnumerationOptions EnumerationOptions { get; }
 
     public abstract Task Search(CancellationToken cancellationToken);
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _searchSubject?.Dispose();
+        }
+    }
+
 }

@@ -1,7 +1,7 @@
 ﻿using LocalRepositoryListing.Searcher;
-using LocalRepositoryListing.ResultProcessor;
+using LocalRepositoryListing.ResultLister;
 
-namespace LocalRepositoryListing.Command;
+namespace LocalRepositoryListing;
 
 /// <summary>
 /// Represents a command for listing local repositories.

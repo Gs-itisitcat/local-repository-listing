@@ -1,4 +1,4 @@
-﻿namespace LocalRepositoryListing.ResultProcessor;
+﻿namespace LocalRepositoryListing.ResultLister;
 
 public interface IResultLister
 {
