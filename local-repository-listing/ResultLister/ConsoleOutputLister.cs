@@ -33,6 +33,7 @@ public class ConsoleOutputLister(ISearcher searcher, string[] searchPattern) : I
 
         try
         {
+            // Don't await directly to respond to cancellation quickly
             var searchTask = _searcher.Search(cancellationToken);
 
             while (
