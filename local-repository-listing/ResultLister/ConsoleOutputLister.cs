@@ -21,7 +21,7 @@ public class ConsoleOutputLister(ISearcher searcher, string[] searchPattern) : I
         {
             var fullName = d.GetNormalizedPath();
 
-            if (string.IsNullOrEmpty(fullName) || !_searchPattern.All(p => fullName.Contains(p)))
+            if (string.IsNullOrEmpty(fullName) || !_searchPattern.All(p => fullName.Contains(p, StringComparison.OrdinalIgnoreCase)))
             {
                 return;
             }
