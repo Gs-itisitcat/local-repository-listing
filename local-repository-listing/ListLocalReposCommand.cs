@@ -42,11 +42,11 @@ internal class LocalRepositoryListingCommand
             RecurseSubdirectories = !nonRecursive,
         };
 
-        var arg = context.EscapedArguments;
+        var escapedArguments = context.EscapedArguments;
 
         IResultLister listable = listOnly
-            ? new ConsoleOutputLister(searcher, arg.ToArray())
-            : new FZFLister(searcher, arg, fuzzyFinderArgs ?? []);
+            ? new ConsoleOutputLister(searcher, escapedArguments.ToArray())
+            : new FZFLister(searcher, escapedArguments, fuzzyFinderArgs ?? []);
 
         var exitCode = await listable.ExecuteListingAsync(cancellationToken);
 
