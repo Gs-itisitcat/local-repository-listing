@@ -20,7 +20,7 @@ source /path/to/lepos.bash
 ## Dependencies
 
 - Fuzzy finder for selection (currently only [fzf](https://github.com/junegunn/fzf) is supported)
-- .NET 8 runtime (only when using the runtime dependent version)
+- .NET 9 runtime (only when using the runtime dependent version)
 
 ## Command
 

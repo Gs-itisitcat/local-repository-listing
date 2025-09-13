@@ -22,7 +22,7 @@ source /path/to/lepos.bash
 ## 依存関係
 
 - 選択に使用するfuzzy finder (現在は[fzf](https://github.com/junegunn/fzf)のみ対応)
-- .NET 8 runtime (runtime dependent版使用時のみ)
+- .NET 9 runtime (runtime dependent版使用時のみ)
 
 ## コマンド
 
