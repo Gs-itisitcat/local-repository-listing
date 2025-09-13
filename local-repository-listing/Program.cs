@@ -1,3 +1,7 @@
+using ConsoleAppFramework;
 using LocalRepositoryListing;
 
-ConsoleApp.Run<LocalRepositoryListingCommand>(args);
+var app = ConsoleApp.Create();
+app.Add<LocalRepositoryListingCommand>();
+
+await app.RunAsync(args);
