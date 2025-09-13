@@ -14,6 +14,7 @@ internal class LocalRepositoryListingCommand
     /// Arguments after `--` are treated as the search pattern.
     /// </summary>
     /// <param name="root">-r,Root path of searching repositories.
+    ///                                    Relative paths are supported.
     ///                                    If not specified, the logical drives will be used as the root paths.</param>
     /// <param name="listOnly">-l,Flag to list local repositories only.</param>
     /// <param name="nonRecursive">-n,Flag to search for repositories non-recursively.</param>
@@ -36,6 +37,12 @@ internal class LocalRepositoryListingCommand
     )
     {
         var rootDirectories = string.IsNullOrEmpty(root) ? Environment.GetLogicalDrives() : [root];
+
+        if (excludePaths != null && excludePaths.Any(p => !Path.IsPathRooted(p)))
+        {
+            Console.Error.WriteLine("Ignore the relative paths in excludePaths. Please specify absolute paths.");
+            excludePaths = [.. excludePaths.Where(p => Path.IsPathRooted(p))];
+        }
 
         using var searcher = new EnumerateDirectorySearcher(rootDirectories, excludePaths ?? [], excludeNames ?? [])
         {
