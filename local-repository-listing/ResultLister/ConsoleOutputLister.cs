@@ -48,7 +48,7 @@ public class ConsoleOutputLister(ISearcher searcher, string[] searchPattern) : I
         catch (OperationCanceledException)
         {
             Console.Error.WriteLine("Search was cancelled.");
-            return 1;
+            return 130;
         }
 
         return 0;
