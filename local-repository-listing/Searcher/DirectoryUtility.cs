@@ -63,7 +63,7 @@ public static class DirectoryUtility
         nameMatcher.AddIncludePatterns(excludeNames);
 
         var isMatchName = directoryPath
-                        .Split(Path.DirectorySeparatorChar)
+                        .Split(Path.AltDirectorySeparatorChar)
                         .Where(p => !string.IsNullOrEmpty(p))
                         .Any(p => nameMatcher.Match(p).HasMatches);
 
