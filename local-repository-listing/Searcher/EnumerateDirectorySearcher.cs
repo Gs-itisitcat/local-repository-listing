@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using R3;
+using ZLinq;
 using static LocalRepositoryListing.Searcher.DirectoryUtility;
 
 namespace LocalRepositoryListing.Searcher;
@@ -61,7 +62,7 @@ public class EnumerateDirectorySearcher(IList<string> rootDirectories, IList<str
                 .WithCancellation(cancellationToken)
                 .SelectMany(d => Directory.EnumerateDirectories(d, _rootSearchPattern, EnumerationOptions));
 
-                ParallelQuery<DirectoryInfo> hitDirectories = RecurseSubdirectories switch
+                var hitDirectories = RecurseSubdirectories switch
                 {
                     true => InsideRootDirectories
                     .AsParallel() // Somehow faster with this additional AsParallel()

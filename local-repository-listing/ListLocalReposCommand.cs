@@ -25,28 +25,28 @@ internal class LocalRepositoryListingCommand
     /// <returns>The result of the command execution.</returns>
     [Command("")]
     public async Task<int> Lepol(
-        CancellationToken cancellationToken,
+        ConsoleAppContext context,
         string root = "",
         bool listOnly = false,
         bool nonRecursive = false,
         string[]? excludePaths = null,
         string[]? excludeNames = null,
         string[]? fuzzyFinderArgs = null,
-        ConsoleAppContext context = null!
+        CancellationToken cancellationToken = default
     )
     {
         var rootDirectories = string.IsNullOrEmpty(root) ? Environment.GetLogicalDrives() : [root];
 
-        ISearcher searcher = new EnumerateDirectorySearcher(rootDirectories, excludePaths ?? [], excludeNames ?? [])
+        using var searcher = new EnumerateDirectorySearcher(rootDirectories, excludePaths ?? [], excludeNames ?? [])
         {
             RecurseSubdirectories = !nonRecursive,
         };
 
-        var arg = context.EscapedArguments.ToArray() ?? [];
+        var arg = context.EscapedArguments;
 
         IResultLister listable = listOnly
-            ? new ConsoleOutputLister(searcher, string.Join(" ", arg))
-            : new FZFLister(searcher, $"\"{string.Join(" ", arg)}\"", fuzzyFinderArgs ?? []);
+            ? new ConsoleOutputLister(searcher, arg.ToArray())
+            : new FZFLister(searcher, arg, fuzzyFinderArgs ?? []);
 
         var exitCode = await listable.ExecuteListingAsync(cancellationToken);
 
