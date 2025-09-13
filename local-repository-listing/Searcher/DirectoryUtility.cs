@@ -1,4 +1,5 @@
 using Microsoft.Extensions.FileSystemGlobbing;
+using ZLinq;
 
 namespace LocalRepositoryListing.Searcher;
 
@@ -40,10 +41,6 @@ public static class DirectoryUtility
     /// </remarks>
     public static bool IsMatchExclude(DirectoryInfo directoryInfo, IReadOnlyCollection<string> excludePaths, IReadOnlyCollection<string> excludeNames)
     {
-        // Console.WriteLine($"Checking {directoryInfo.GetNormalizedPath()}");
-        // Console.WriteLine($"Exclude paths: {string.Join(", ", excludePaths)}");
-        // Console.WriteLine($"Exclude names: {string.Join(", ", excludeNames)}");
-        // Console.WriteLine($"IsMatchExclude: {directoryInfo.GetNormalizedPath().StartsWith(NormalizePath(excludePaths.First()))}");
         if (directoryInfo == null || !directoryInfo.Exists)
         {
             return true;

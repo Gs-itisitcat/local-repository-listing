@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using R3;
+using ZLinq;
 using static LocalRepositoryListing.Searcher.DirectoryUtility;
 
 namespace LocalRepositoryListing.Searcher;
@@ -56,14 +57,14 @@ public class EnumerateDirectorySearcher(IList<string> rootDirectories, IList<str
         {
             try
             {
-                var InsideRootDirectories = RootDirectories
+                var insideRootDirectories = RootDirectories
                 .AsParallel()
                 .WithCancellation(cancellationToken)
                 .SelectMany(d => Directory.EnumerateDirectories(d, _rootSearchPattern, EnumerationOptions));
 
-                ParallelQuery<DirectoryInfo> hitDirectories = RecurseSubdirectories switch
+                var foundDirectories = RecurseSubdirectories switch
                 {
-                    true => InsideRootDirectories
+                    true => insideRootDirectories
                     .AsParallel() // Somehow faster with this additional AsParallel()
                     .WithCancellation(cancellationToken)
                     .Where(d => !IsMatchExclude(new DirectoryInfo(d), ExcludePaths, ExcludeNames))
@@ -72,12 +73,12 @@ public class EnumerateDirectorySearcher(IList<string> rootDirectories, IList<str
                     .Where(d => d != null)
                     .Select(d => d ?? throw new UnreachableException("Parent directories that are null should have already been excluded.")),
 
-                    false => InsideRootDirectories
+                    false => insideRootDirectories
                     .Select(d => new DirectoryInfo(d))
                     .Where(d => d.GetDirectories(_searchPattern, SearchOption.TopDirectoryOnly).Length != 0),
                 };
 
-                hitDirectories
+                foundDirectories
                 .Where(d => !IsMatchExclude(d, ExcludePaths, ExcludeNames))
                 .ForAll(_searchSubject.OnNext);
 

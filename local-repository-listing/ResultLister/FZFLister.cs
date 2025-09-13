@@ -1,4 +1,5 @@
 ﻿using LocalRepositoryListing.Searcher;
+using ZLinq;
 
 namespace LocalRepositoryListing.ResultLister;
 
@@ -7,7 +8,7 @@ namespace LocalRepositoryListing.ResultLister;
 /// </summary>
 /// <seealso cref="FuzzyFinderListerBase" />
 /// <seealso cref="IResultLister" />
-public class FZFLister(ISearcher searcher, string? searchPattern, string[] args) : FuzzyFinderListerBase(searcher, arguments: [
+public class FZFLister(ISearcher searcher, ReadOnlySpan<string> searchPattern, string[] args) : FuzzyFinderListerBase(searcher, arguments: [
             "--ansi",
             "--header",
             "\"Select a git repository\"",
@@ -23,7 +24,7 @@ public class FZFLister(ISearcher searcher, string? searchPattern, string[] args)
             "--bind",
             "\"alt-?:preview:git -C {} branch  --color=always -a \"",
             "--query",
-            $"{(string.IsNullOrWhiteSpace(searchPattern) ? "\"\"" : searchPattern)}",
+            $"{(searchPattern.IsEmpty ? "\"\"" : $"\"{searchPattern.JoinToString(" ")}\"")}",
             ..args
     ]), IResultLister
 {

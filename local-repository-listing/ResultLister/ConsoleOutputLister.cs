@@ -7,12 +7,12 @@ namespace LocalRepositoryListing.ResultLister;
 /// </summary>
 /// <param name="searcher">The <see cref="ISearcher"/> object representing the searcher.</param>
 /// <param name="searchPattern">The search pattern to match against the full names of the directories.</param>
-public class ConsoleOutputLister(ISearcher searcher, string searchPattern) : IResultLister
+public class ConsoleOutputLister(ISearcher searcher, string[] searchPattern) : IResultLister
 {
     /// <summary>
     /// The search pattern to match against the full names of the directories.
     /// </summary>
-    private readonly string _searchPattern = searchPattern;
+    private readonly string[] _searchPattern = searchPattern;
     private readonly ISearcher _searcher = searcher;
 
     public async ValueTask<int> ExecuteListingAsync(CancellationToken cancellationToken)
@@ -21,7 +21,7 @@ public class ConsoleOutputLister(ISearcher searcher, string searchPattern) : IRe
         {
             var fullName = d.GetNormalizedPath();
 
-            if (string.IsNullOrEmpty(fullName) || (!string.IsNullOrEmpty(_searchPattern) && !fullName.Contains(_searchPattern)))
+            if (string.IsNullOrEmpty(fullName) || !_searchPattern.All(p => fullName.Contains(p)))
             {
                 return;
             }
