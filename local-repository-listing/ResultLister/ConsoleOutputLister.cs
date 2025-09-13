@@ -47,11 +47,9 @@ public class ConsoleOutputLister(ISearcher searcher, string[] searchPattern) : I
         }
         catch (OperationCanceledException)
         {
-            searchSubscription.Dispose();
             Console.Error.WriteLine("Search was cancelled.");
             return 1;
         }
-        searchSubscription.Dispose();
 
         return 0;
     }
