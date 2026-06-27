@@ -1,6 +1,7 @@
 ﻿using LocalRepositoryListing.Searcher;
 using LocalRepositoryListing.ResultLister;
 using ConsoleAppFramework;
+using System.Threading.Channels;
 
 namespace LocalRepositoryListing;
 
@@ -45,16 +46,24 @@ internal class LocalRepositoryListingCommand
             excludePaths = [.. excludePaths.Where(p => Path.IsPathRooted(p))];
         }
 
-        using var searcher = new EnumerateDirectorySearcher(rootDirectories, excludePaths ?? [], excludeNames ?? [])
+        var searcher = new EnumerateDirectorySearcher(rootDirectories, excludePaths ?? [], excludeNames ?? [])
         {
             RecurseSubdirectories = !nonRecursive,
         };
 
         IResultLister listable = listOnly
-            ? new ConsoleOutputLister(searcher, args)
-            : new FZFLister(searcher, args, fuzzyFinderArgs ?? []);
+            ? new ConsoleOutputLister(args)
+            : new FZFLister(args, fuzzyFinderArgs ?? []);
 
-        var exitCode = await listable.ExecuteListingAsync(cancellationToken);
+        var channel = Channel.CreateUnbounded<DirectoryInfo>(new UnboundedChannelOptions
+        {
+            SingleReader = true,
+            SingleWriter = false,
+        });
+
+        var searching = searcher.Search(channel.Writer, cancellationToken);
+        var exitCode = await listable.ExecuteListingAsync(channel.Reader, cancellationToken);
+
 
         return exitCode;
     }

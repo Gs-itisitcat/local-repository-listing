@@ -1,6 +1,4 @@
-using System.Diagnostics;
-using R3;
-using ZLinq;
+using System.Threading.Channels;
 using static LocalRepositoryListing.Searcher.DirectoryUtility;
 
 namespace LocalRepositoryListing.Searcher;
@@ -51,59 +49,56 @@ public class EnumerateDirectorySearcher(IList<string> rootDirectories, IList<str
     /// </remarks>
     public bool RecurseSubdirectories { get; init; } = true;
 
-    public override Task Search(CancellationToken cancellationToken)
+    public override async Task Search(ChannelWriter<DirectoryInfo> writer, CancellationToken cancellationToken)
     {
-        return Task.Run(() =>
+        try
         {
-            try
+            var parallelOptions = new ParallelOptions { CancellationToken = cancellationToken };
+            await Parallel.ForEachAsync(RootDirectories, parallelOptions, async (rootDirectory, ct) =>
             {
-                var parallelOptions = new ParallelOptions { CancellationToken = cancellationToken };
-                Parallel.ForEach(RootDirectories, parallelOptions, rootDirectory =>
+                var rootEntries = Directory.EnumerateDirectories(rootDirectory, _rootSearchPattern, EnumerationOptions);
+
+                await Parallel.ForEachAsync(rootEntries, parallelOptions, async (rootEntry, ct) =>
                 {
-                    var rootEntries = Directory.EnumerateDirectories(rootDirectory, _rootSearchPattern, EnumerationOptions);
-
-                    Parallel.ForEach(rootEntries, parallelOptions, rootEntry =>
+                    var rootEntryInfo = new DirectoryInfo(rootEntry);
+                    if (IsMatchExclude(rootEntryInfo, ExcludePaths, ExcludeNames))
                     {
-                        var rootEntryInfo = new DirectoryInfo(rootEntry);
-                        if (IsMatchExclude(rootEntryInfo, ExcludePaths, ExcludeNames))
-                        {
-                            return;
-                        }
+                        return;
+                    }
 
-                        if (RecurseSubdirectories)
+                    if (RecurseSubdirectories)
+                    {
+                        var gitDirectories = Directory.EnumerateDirectories(rootEntry, _searchPattern, _recursiveEnumerationOptions);
+                        await Parallel.ForEachAsync(gitDirectories, parallelOptions, async (gitDirectory, ct) =>
                         {
-                            var gitDirectories = Directory.EnumerateDirectories(rootEntry, _searchPattern, _recursiveEnumerationOptions);
-                            Parallel.ForEach(gitDirectories, parallelOptions, gitDirectory =>
+                            var gitRepositoryInfo = Directory.GetParent(gitDirectory);
+                            if (gitRepositoryInfo == null || IsMatchExclude(gitRepositoryInfo, ExcludePaths, ExcludeNames))
                             {
-                                var gitRepositoryInfo = Directory.GetParent(gitDirectory);
-                                if (gitRepositoryInfo == null || IsMatchExclude(gitRepositoryInfo, ExcludePaths, ExcludeNames))
-                                {
-                                    return;
-                                }
-
-                                _searchSubject.OnNext(gitRepositoryInfo);
-                            });
-                        }
-                        else
-                        {
-                            var gitDirectories = rootEntryInfo.GetDirectories(_searchPattern, SearchOption.TopDirectoryOnly);
-                            if (gitDirectories.Length == 0)
-                            {
-                                // No .git directory found in the root entry; root entry is not a git repository, so we skip it.
                                 return;
                             }
 
-                            _searchSubject.OnNext(rootEntryInfo);
+                            await writer.WriteAsync(gitRepositoryInfo, ct);
+                        });
+                    }
+                    else
+                    {
+                        var gitDirectories = rootEntryInfo.GetDirectories(_searchPattern, SearchOption.TopDirectoryOnly);
+                        if (gitDirectories.Length == 0)
+                        {
+                            // No .git directory found in the root entry; root entry is not a git repository, so we skip it.
+                            return;
                         }
-                    });
-                });
 
-                _searchSubject.OnCompleted(Result.Success);
-            }
-            catch (OperationCanceledException e)
-            {
-                _searchSubject.OnCompleted(Result.Failure(e));
-            }
-        }, cancellationToken);
+                        await writer.WriteAsync(rootEntryInfo, ct);
+                    }
+                });
+            });
+
+            writer.Complete();
+        }
+        catch (OperationCanceledException e)
+        {
+            writer.Complete(e);
+        }
     }
 }

@@ -1,15 +1,10 @@
-﻿using R3;
-
+﻿using System.Threading.Channels;
 namespace LocalRepositoryListing.Searcher;
 
-public abstract class DirectorySearcherBase : ISearcher, IDisposable
-
+public abstract class DirectorySearcherBase : ISearcher
 {
-    protected readonly Subject<DirectoryInfo> _searchSubject = new();
     protected static readonly string _rootSearchPattern = "*";
     protected static readonly string _searchPattern = ".git";
-
-    public Observable<DirectoryInfo> SearchResults { get; }
 
     /// <summary>
     /// Gets the root directories to search in.
@@ -37,7 +32,6 @@ public abstract class DirectorySearcherBase : ISearcher, IDisposable
         RootDirectories = rootDirectories.AsReadOnly();
         ExcludePaths = excludePaths.AsReadOnly();
         ExcludeNames = excludeNames.AsReadOnly();
-        SearchResults = _searchSubject;
     }
 
 
@@ -46,20 +40,6 @@ public abstract class DirectorySearcherBase : ISearcher, IDisposable
     /// </summary>
     protected abstract EnumerationOptions EnumerationOptions { get; }
 
-    public abstract Task Search(CancellationToken cancellationToken);
-
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            _searchSubject?.Dispose();
-        }
-    }
+    public abstract Task Search(ChannelWriter<DirectoryInfo> writer, CancellationToken cancellationToken);
 
 }
