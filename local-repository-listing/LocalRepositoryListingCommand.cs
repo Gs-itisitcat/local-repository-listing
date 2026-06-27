@@ -10,8 +10,7 @@ namespace LocalRepositoryListing;
 internal class LocalRepositoryListingCommand
 {
     /// <summary>
-    /// Executes the list local repositories command.
-    /// Arguments after `--` are treated as the search pattern.
+    /// Lists local git repositories.
     /// </summary>
     /// <param name="root">-r,Root path of searching repositories.
     ///                                    Relative paths are supported.
@@ -23,17 +22,19 @@ internal class LocalRepositoryListingCommand
     ///                                    Any Path that contains the directory of the name will be excluded.
     ///                                    You can use glob patterns.</param>
     /// <param name="fuzzyFinderArgs">-a,Arguments to pass to the fuzzy finder process.</param>
+    /// <param name="cancellationToken">A cancellation token to handle SIGINT/SIGTERM/SIGKILL - Ctrl+C.</param>
+    /// <param name="args">Search patterns.</param>
     /// <returns>The result of the command execution.</returns>
     [Command("")]
     public async Task<int> Lepol(
-        ConsoleAppContext context,
-        string root = "",
+        string? root = null,
         bool listOnly = false,
         bool nonRecursive = false,
         string[]? excludePaths = null,
         string[]? excludeNames = null,
         string[]? fuzzyFinderArgs = null,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken = default,
+        [Argument] params string[] args
     )
     {
         var rootDirectories = string.IsNullOrEmpty(root) ? Environment.GetLogicalDrives() : [root];
@@ -49,11 +50,9 @@ internal class LocalRepositoryListingCommand
             RecurseSubdirectories = !nonRecursive,
         };
 
-        var escapedArguments = context.EscapedArguments;
-
         IResultLister listable = listOnly
-            ? new ConsoleOutputLister(searcher, escapedArguments.ToArray())
-            : new FZFLister(searcher, escapedArguments, fuzzyFinderArgs ?? []);
+            ? new ConsoleOutputLister(searcher, args)
+            : new FZFLister(searcher, args, fuzzyFinderArgs ?? []);
 
         var exitCode = await listable.ExecuteListingAsync(cancellationToken);
 
