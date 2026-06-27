@@ -32,12 +32,12 @@ internal class LocalRepositoryListingCommand
     /// <returns>The result of the command execution.</returns>
     [Command("")]
     public async Task<int> Lepol(
-        string? root = null,
+        [HideDefaultValue]string? root = null,
         bool listOnly = false,
         bool nonRecursive = false,
-        string[]? excludePaths = null,
-        string[]? excludeNames = null,
-        string[]? fuzzyFinderArgs = null,
+        [HideDefaultValue]string[]? excludePaths = null,
+        [HideDefaultValue]string[]? excludeNames = null,
+        [HideDefaultValue]string[]? fuzzyFinderArgs = null,
         CancellationToken cancellationToken = default,
         [Argument] params string[] args
     )
