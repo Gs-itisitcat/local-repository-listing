@@ -57,30 +57,46 @@ public class EnumerateDirectorySearcher(IList<string> rootDirectories, IList<str
         {
             try
             {
-                var insideRootDirectories = RootDirectories
-                .AsParallel()
-                .WithCancellation(cancellationToken)
-                .SelectMany(d => Directory.EnumerateDirectories(d, _rootSearchPattern, EnumerationOptions));
-
-                var foundDirectories = RecurseSubdirectories switch
+                var parallelOptions = new ParallelOptions { CancellationToken = cancellationToken };
+                Parallel.ForEach(RootDirectories, parallelOptions, rootDirectory =>
                 {
-                    true => insideRootDirectories
-                    .AsParallel() // Somehow faster with this additional AsParallel()
-                    .WithCancellation(cancellationToken)
-                    .Where(d => !IsMatchExclude(new DirectoryInfo(d), ExcludePaths, ExcludeNames))
-                    .SelectMany(d => Directory.EnumerateDirectories(d, _searchPattern, _recursiveEnumerationOptions))
-                    .Select(d => Directory.GetParent(d))
-                    .Where(d => d != null)
-                    .Select(d => d ?? throw new UnreachableException("Parent directories that are null should have already been excluded.")),
+                    var rootEntries = Directory.EnumerateDirectories(rootDirectory, _rootSearchPattern, EnumerationOptions);
 
-                    false => insideRootDirectories
-                    .Select(d => new DirectoryInfo(d))
-                    .Where(d => d.GetDirectories(_searchPattern, SearchOption.TopDirectoryOnly).Length != 0),
-                };
+                    Parallel.ForEach(rootEntries, parallelOptions, rootEntry =>
+                    {
+                        var rootEntryInfo = new DirectoryInfo(rootEntry);
+                        if (IsMatchExclude(rootEntryInfo, ExcludePaths, ExcludeNames))
+                        {
+                            return;
+                        }
 
-                foundDirectories
-                .Where(d => !IsMatchExclude(d, ExcludePaths, ExcludeNames))
-                .ForAll(_searchSubject.OnNext);
+                        if (RecurseSubdirectories)
+                        {
+                            var gitDirectories = Directory.EnumerateDirectories(rootEntry, _searchPattern, _recursiveEnumerationOptions);
+                            Parallel.ForEach(gitDirectories, parallelOptions, gitDirectory =>
+                            {
+                                var gitRepositoryInfo = Directory.GetParent(gitDirectory);
+                                if (gitRepositoryInfo == null || IsMatchExclude(gitRepositoryInfo, ExcludePaths, ExcludeNames))
+                                {
+                                    return;
+                                }
+
+                                _searchSubject.OnNext(gitRepositoryInfo);
+                            });
+                        }
+                        else
+                        {
+                            var gitDirectories = rootEntryInfo.GetDirectories(_searchPattern, SearchOption.TopDirectoryOnly);
+                            if (gitDirectories.Length == 0)
+                            {
+                                // No .git directory found in the root entry; root entry is not a git repository, so we skip it.
+                                return;
+                            }
+
+                            _searchSubject.OnNext(rootEntryInfo);
+                        }
+                    });
+                });
 
                 _searchSubject.OnCompleted(Result.Success);
             }
