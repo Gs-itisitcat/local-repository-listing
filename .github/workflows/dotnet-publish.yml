@@ -10,55 +10,98 @@ on:
     branches: [ "master" ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  build-and-release:
+  version:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '10.0.x'  # 使用する.NETのバージョン
-
-      - name: Restore dependencies
-        run: dotnet restore
+      - uses: actions/checkout@v4
 
       - name: Get the version
+        id: version
         run: |
-          echo "VERSION=$(grep '<Version>' local-repository-listing/local-repository-listing.csproj | head -1 | awk -F'[<>]' '{print $3}')" >> $GITHUB_ENV
+          version="$(grep '<Version>' local-repository-listing/local-repository-listing.csproj | head -1 | sed -E 's/.*<Version>([^<]+)<\/Version>.*/\1/')"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - name: Publish Windows x64 Runtime Dependent
+  publish:
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            archive_name: lepol-windows-x64-native-aot
+          - os: ubuntu-latest
+            rid: linux-x64
+            archive_name: lepol-linux-x64-native-aot
+    runs-on: ${{ matrix.os }}
+    name: Publish ${{ matrix.rid }} Native AOT
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install Native AOT prerequisites
+        if: runner.os == 'Linux'
         run: |
-          dotnet publish local-repository-listing/local-repository-listing.csproj --configuration Release --output publish/windows-runtime-dependent --runtime win-x64 --self-contained false
-          zip -r -j lepol-windows-x64-runtime-dependent-${{ env.VERSION }}.zip publish/windows-runtime-dependent src/lepos.bash
+          sudo apt-get update
+          sudo apt-get install -y clang zlib1g-dev
 
-      - name: Publish Windows x64 Self-Contained
+      - name: Restore dependencies
+        run: dotnet restore local-repository-listing/local-repository-listing.csproj --runtime ${{ matrix.rid }}
+
+      - name: Publish Native AOT
+        run: dotnet publish local-repository-listing/local-repository-listing.csproj --configuration Release --runtime ${{ matrix.rid }} --self-contained true --output publish/${{ matrix.rid }} --no-restore -p:PublishAot=true
+
+      - name: Archive Linux Native AOT
+        if: runner.os == 'Linux'
         run: |
-          dotnet publish local-repository-listing/local-repository-listing.csproj --configuration Release --output publish/windows-self-contained --runtime win-x64 --self-contained true
-          zip -r -j lepol-windows-x64-self-contained-${{ env.VERSION }}.zip publish/windows-self-contained src/lepos.bash
+          mkdir -p artifacts
+          zip -r -j artifacts/${{ matrix.archive_name }}-${{ needs.version.outputs.version }}.zip publish/${{ matrix.rid }} src/lepos.bash
 
-      - name: Publish Linux x64 Runtime Dependent
+      - name: Archive Windows Native AOT
+        if: runner.os == 'Windows'
+        shell: pwsh
         run: |
-          dotnet publish local-repository-listing/local-repository-listing.csproj --configuration Release --output publish/linux-runtime-dependent --runtime linux-x64 --self-contained false
-          zip -r -j lepol-linux-x64-runtime-dependent-${{ env.VERSION }}.zip publish/linux-runtime-dependent src/lepos.bash
+          New-Item -ItemType Directory -Path artifacts -Force | Out-Null
+          Compress-Archive -Path "publish/${{ matrix.rid }}/*", "src/lepos.bash" -DestinationPath "artifacts/${{ matrix.archive_name }}-${{ needs.version.outputs.version }}.zip" -Force
 
-      - name: Publish Linux x64 Self-Contained
-        run: |
-          dotnet publish local-repository-listing/local-repository-listing.csproj --configuration Release --output publish/linux-self-contained --runtime linux-x64 --self-contained true
-          zip -r -j lepol-linux-x64-self-contained-${{ env.VERSION }}.zip publish/linux-self-contained src/lepos.bash
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.archive_name }}-${{ needs.version.outputs.version }}
+          path: artifacts/${{ matrix.archive_name }}-${{ needs.version.outputs.version }}.zip
+          if-no-files-found: error
 
+  release:
+    if: github.event_name != 'pull_request'
+    needs:
+      - version
+      - publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
 
       - name: Release with action-gh-release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          files: |
-            lepol-windows-x64-runtime-dependent-${{ env.VERSION }}.zip
-            lepol-windows-x64-self-contained-${{ env.VERSION }}.zip
-            lepol-linux-x64-runtime-dependent-${{ env.VERSION }}.zip
-            lepol-linux-x64-self-contained-${{ env.VERSION }}.zip
+          files: artifacts/*.zip
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: v${{ env.VERSION }}
-          name: Release v${{ env.VERSION }}
+          tag_name: v${{ needs.version.outputs.version }}
+          name: Release v${{ needs.version.outputs.version }}
           draft: false
           prerelease: false
