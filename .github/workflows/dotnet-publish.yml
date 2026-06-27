@@ -65,14 +65,14 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           mkdir -p artifacts
-          zip -r -j artifacts/${{ matrix.archive_name }}-${{ needs.version.outputs.version }}.zip publish/${{ matrix.rid }} src/lepos.bash
+          zip -r -j artifacts/${{ matrix.archive_name }}-${{ needs.version.outputs.version }}.zip publish/${{ matrix.rid }} src/lepos.sh
 
       - name: Archive Windows Native AOT
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path artifacts -Force | Out-Null
-          Compress-Archive -Path "publish/${{ matrix.rid }}/*", "src/lepos.bash" -DestinationPath "artifacts/${{ matrix.archive_name }}-${{ needs.version.outputs.version }}.zip" -Force
+          Compress-Archive -Path "publish/${{ matrix.rid }}/*", "src/lepos.sh" -DestinationPath "artifacts/${{ matrix.archive_name }}-${{ needs.version.outputs.version }}.zip" -Force
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

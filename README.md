@@ -13,10 +13,10 @@ List git local repository on your computer.
 - [Release](https://github.com/Gs-itisitcat/local-repository-listing/releases)からダウンロード
 - 任意のディレクトリに解凍
 - lepolまでのPATHを通す
-- .bashrcなどでlepos.bashをsource
+- .bashrc または .zshrc などでlepos.shをsource
 
 ```bash
-source /path/to/lepos.bash
+source /path/to/lepos.sh
 ```
 
 ## 依存関係

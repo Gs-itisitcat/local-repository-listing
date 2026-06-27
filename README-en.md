@@ -11,10 +11,10 @@ Provides the `lepol` (local repository listing) command to search for repositori
 - Download from [Release](https://github.com/Gs-itisitcat/local-repository-listing/releases)
 - Unzip to any directory
 - Add the PATH to lepol
-- Source lepos.bash in .bashrc or similar
+- Source lepos.sh in .bashrc, .zshrc, or similar
 
 ```bash
-source /path/to/lepos.bash
+source /path/to/lepos.sh
 ```
 
 ## Dependencies
