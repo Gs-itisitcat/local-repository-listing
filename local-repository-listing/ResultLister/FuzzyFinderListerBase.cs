@@ -60,7 +60,10 @@ public abstract class FuzzyFinderListerBase : IResultLister
 
         var running = process.WaitForExitAsync(cancellationToken);
 
-        await foreach (var directory in reader.ReadAllAsync(cancellationToken))
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        process.Exited += (sender, e) => linkedCts.Cancel();
+
+        await foreach (var directory in reader.ReadAllAsync(linkedCts.Token))
         {
             var fullName = directory.GetNormalizedPath();
             if (string.IsNullOrEmpty(fullName))
