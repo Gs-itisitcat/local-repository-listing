@@ -37,7 +37,8 @@ public abstract class FuzzyFinderListerBase : IResultLister
             UseShellExecute = false,
             RedirectStandardInput = true,
             // For Non-ASCII characters
-            StandardInputEncoding = System.Text.Encoding.UTF8,
+            // Set the standard input encoding to UTF-8 without BOM
+            StandardInputEncoding = new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
             Arguments = string.Join(" ", arguments),
         };
     }
