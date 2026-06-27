@@ -22,7 +22,6 @@ source /path/to/lepos.bash
 ## 依存関係
 
 - 選択に使用するfuzzy finder (現在は[fzf](https://github.com/junegunn/fzf)のみ対応)
-- .NET 9 runtime (runtime dependent版使用時のみ)
 
 ## コマンド
 
@@ -30,12 +29,11 @@ source /path/to/lepos.bash
 lepos [options] [arguments]
 ```
 
-- 引数無し: 全ドライブのルートから再帰的に検索
-- 引数有り: 全ドライブのルートから再帰的に検索し、引数で指定したディレクトリ名を含むリポジトリをfuzzy finderでクエリ
+- arguments: fuzzy finderに渡す検索パターン。複数指定可
 
 ### flags
 
-- --root/-r: 検索するディレクトリパス。指定しない場合は全ドライブのルートから再帰的に検索
+- --root/-r: 検索するディレクトリパス。指定しない場合は全ドライブ(ネットワークドライブを除く)のルートから検索
 - --non-recursive/-n: 再帰的に検索しない
 - --list-only/-l: 検索結果の出力のみ
 - --exclude-name/-e: 検索対象から除外するディレクトリ名 (複数指定可)
