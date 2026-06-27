@@ -12,10 +12,14 @@ internal class LocalRepositoryListingCommand
 {
     /// <summary>
     /// Lists local git repositories.
+    ///
+    /// Searches for local git repositories based on the specified criteria and lists the results.
+    /// By default, the search is performed recursively, and for all logical drives except for network drives.
     /// </summary>
     /// <param name="root">-r,Root path of searching repositories.
-    ///                                    Relative paths are supported.
-    ///                                    If not specified, the logical drives will be used as the root paths.</param>
+    ///                                     Relative paths are supported.
+    ///                                     If not specified, the logical drives will be used as the root paths,
+    ///                                     except for network drives.</param>
     /// <param name="listOnly">-l,Flag to list local repositories only.</param>
     /// <param name="nonRecursive">-n,Flag to search for repositories non-recursively.</param>
     /// <param name="excludePaths">-ep,The paths to exclude from the search. Must be absolute paths.</param>
@@ -38,7 +42,12 @@ internal class LocalRepositoryListingCommand
         [Argument] params string[] args
     )
     {
-        var rootDirectories = string.IsNullOrEmpty(root) ? Environment.GetLogicalDrives() : [root];
+        var rootDirectories = string.IsNullOrEmpty(root)
+            ? DriveInfo.GetDrives()
+                .Where(d => d.IsReady && d.DriveType != DriveType.Network)
+                .Select(d => d.Name)
+                .ToArray()
+            : [root];
 
         if (excludePaths != null && excludePaths.Any(p => !Path.IsPathRooted(p)))
         {
