@@ -32,12 +32,12 @@ internal class LocalRepositoryListingCommand
     /// <returns>The result of the command execution.</returns>
     [Command("")]
     public async Task<int> Lepol(
-        [HideDefaultValue]string? root = null,
+        [HideDefaultValue] string? root = null,
         bool listOnly = false,
         bool nonRecursive = false,
-        [HideDefaultValue]string[]? excludePaths = null,
-        [HideDefaultValue]string[]? excludeNames = null,
-        [HideDefaultValue]string[]? fuzzyFinderArgs = null,
+        [HideDefaultValue] string[]? excludePaths = null,
+        [HideDefaultValue] string[]? excludeNames = null,
+        [HideDefaultValue] string[]? fuzzyFinderArgs = null,
         CancellationToken cancellationToken = default,
         [Argument] params string[] args
     )
@@ -70,10 +70,18 @@ internal class LocalRepositoryListingCommand
             SingleWriter = false,
         });
 
-        var searching = searcher.Search(channel.Writer, cancellationToken);
-        var exitCode = await listable.ExecuteListingAsync(channel.Reader, cancellationToken);
-
+        var listing = listable.ExecuteListingAsync(channel.Reader, cancellationToken);
+        using var listingFinishedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var searching = Search(searcher, channel.Writer, listingFinishedCts.Token);
+        var exitCode = await listing;
+        listingFinishedCts.Cancel();
 
         return exitCode;
+    }
+
+    private static async Task Search(ISearcher searcher, ChannelWriter<DirectoryInfo> writer, CancellationToken cancellationToken = default)
+    {
+        await searcher.Search(writer, cancellationToken);
+        writer.Complete();
     }
 }

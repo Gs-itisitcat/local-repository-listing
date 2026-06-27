@@ -51,54 +51,46 @@ public class EnumerateDirectorySearcher(IList<string> rootDirectories, IList<str
 
     public override async Task Search(ChannelWriter<DirectoryInfo> writer, CancellationToken cancellationToken)
     {
-        try
+        var parallelOptions = new ParallelOptions { CancellationToken = cancellationToken };
+        await Parallel.ForEachAsync(RootDirectories, parallelOptions, async (rootDirectory, ct) =>
         {
-            var parallelOptions = new ParallelOptions { CancellationToken = cancellationToken };
-            await Parallel.ForEachAsync(RootDirectories, parallelOptions, async (rootDirectory, ct) =>
+            var rootEntries = Directory.EnumerateDirectories(rootDirectory, _rootSearchPattern, EnumerationOptions);
+
+            await Parallel.ForEachAsync(rootEntries, parallelOptions, async (rootEntry, ct) =>
             {
-                var rootEntries = Directory.EnumerateDirectories(rootDirectory, _rootSearchPattern, EnumerationOptions);
-
-                await Parallel.ForEachAsync(rootEntries, parallelOptions, async (rootEntry, ct) =>
+                var rootEntryInfo = new DirectoryInfo(rootEntry);
+                if (IsMatchExclude(rootEntryInfo, ExcludePaths, ExcludeNames))
                 {
-                    var rootEntryInfo = new DirectoryInfo(rootEntry);
-                    if (IsMatchExclude(rootEntryInfo, ExcludePaths, ExcludeNames))
-                    {
-                        return;
-                    }
+                    return;
+                }
 
-                    if (RecurseSubdirectories)
+                if (RecurseSubdirectories)
+                {
+                    var gitDirectories = Directory.EnumerateDirectories(rootEntry, _searchPattern, _recursiveEnumerationOptions);
+                    await Parallel.ForEachAsync(gitDirectories, parallelOptions, async (gitDirectory, ct) =>
                     {
-                        var gitDirectories = Directory.EnumerateDirectories(rootEntry, _searchPattern, _recursiveEnumerationOptions);
-                        await Parallel.ForEachAsync(gitDirectories, parallelOptions, async (gitDirectory, ct) =>
+                        var gitRepositoryInfo = Directory.GetParent(gitDirectory);
+                        if (gitRepositoryInfo == null || IsMatchExclude(gitRepositoryInfo, ExcludePaths, ExcludeNames))
                         {
-                            var gitRepositoryInfo = Directory.GetParent(gitDirectory);
-                            if (gitRepositoryInfo == null || IsMatchExclude(gitRepositoryInfo, ExcludePaths, ExcludeNames))
-                            {
-                                return;
-                            }
-
-                            await writer.WriteAsync(gitRepositoryInfo, ct);
-                        });
-                    }
-                    else
-                    {
-                        var gitDirectories = rootEntryInfo.GetDirectories(_searchPattern, SearchOption.TopDirectoryOnly);
-                        if (gitDirectories.Length == 0)
-                        {
-                            // No .git directory found in the root entry; root entry is not a git repository, so we skip it.
                             return;
                         }
 
-                        await writer.WriteAsync(rootEntryInfo, ct);
+                        await writer.WriteAsync(gitRepositoryInfo, ct);
+                    });
+                }
+                else
+                {
+                    var gitDirectories = rootEntryInfo.GetDirectories(_searchPattern, SearchOption.TopDirectoryOnly);
+                    if (gitDirectories.Length == 0)
+                    {
+                        // No .git directory found in the root entry; root entry is not a git repository, so we skip it.
+                        return;
                     }
-                });
-            });
 
-            writer.Complete();
-        }
-        catch (OperationCanceledException e)
-        {
-            writer.Complete(e);
-        }
+                    await writer.WriteAsync(rootEntryInfo, ct);
+                }
+            });
+        });
+
     }
 }
