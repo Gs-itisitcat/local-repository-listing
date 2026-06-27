@@ -1,3 +1,9 @@
-using LocalRepositoryListing.Command;
+using ConsoleAppFramework;
+using LocalRepositoryListing;
 
-ConsoleApp.Run<LocalRepositoryListingCommand>(args);
+[assembly: ZLinq.ZLinqDropIn("ZLinq", ZLinq.DropInGenerateTypes.Collection)]
+
+var app = ConsoleApp.Create();
+app.Add<LocalRepositoryListingCommand>();
+
+await app.RunAsync(args);

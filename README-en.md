@@ -11,16 +11,15 @@ Provides the `lepol` (local repository listing) command to search for repositori
 - Download from [Release](https://github.com/Gs-itisitcat/local-repository-listing/releases)
 - Unzip to any directory
 - Add the PATH to lepol
-- Source lepos.bash in .bashrc or similar
+- Source lepos.sh in .bashrc, .zshrc, or similar
 
 ```bash
-source /path/to/lepos.bash
+source /path/to/lepos.sh
 ```
 
 ## Dependencies
 
 - Fuzzy finder for selection (currently only [fzf](https://github.com/junegunn/fzf) is supported)
-- .NET 8 runtime (only when using the runtime dependent version)
 
 ## Command
 
@@ -28,12 +27,11 @@ source /path/to/lepos.bash
 lepos [options] [arguments]
 ```
 
-- No arguments: Recursively search from the root of all drives.
-- With arguments: Recursively search from the root of all drives and query the repository containing the directory name specified by the argument with the fuzzy finder.
+- arguments: Search patterns to pass to the fuzzy finder. Multiple patterns can be specified.
 
 ### Flags
 
-- --root/-r: Specify the directory path to search. If not specified, recursively search from the root of all drives.
+- --root/-r: Specify the directory path to search. If not specified, search from the root of all drives (excluding network drives).
 - --non-recursive/-n: Do not search recursively.
 - --list-only/-l: Only output the search results.
 - --exclude-name/-e: Specify the directory name to exclude from the search (multiple can be specified).

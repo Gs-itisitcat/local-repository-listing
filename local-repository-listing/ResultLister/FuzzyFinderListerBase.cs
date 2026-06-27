@@ -1,9 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Threading.Channels;
 using LocalRepositoryListing.Searcher;
-using R3;
 
-namespace LocalRepositoryListing.ResultProcessor;
+namespace LocalRepositoryListing.ResultLister;
 
 /// <summary>
 /// Represents the base class for a fuzzy finder process.
@@ -22,14 +22,13 @@ public abstract class FuzzyFinderListerBase : IResultLister
     private readonly string[] _arguments = [];
 
     private readonly ProcessStartInfo _processStartInfo;
-    private readonly ISearcher _searcher;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FuzzyFinderListerBase"/> class.
     /// </summary>
     /// <param name="searcher">The <see cref="ISearcher"/> object representing the searcher.</param>
     /// <param name="arguments">The arguments for the processor.</param>
-    public FuzzyFinderListerBase(ISearcher searcher, string[] arguments)
+    public FuzzyFinderListerBase(string[] arguments)
     {
         _arguments = arguments;
         _processStartInfo = new ProcessStartInfo(FuzzyFinderName)
@@ -38,35 +37,51 @@ public abstract class FuzzyFinderListerBase : IResultLister
             UseShellExecute = false,
             RedirectStandardInput = true,
             // For Non-ASCII characters
-            StandardInputEncoding = System.Text.Encoding.UTF8,
+            // Set the standard input encoding to UTF-8 without BOM
+            StandardInputEncoding = new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
             Arguments = string.Join(" ", arguments),
         };
-
-        _searcher = searcher;
     }
 
-    public ValueTask<int> ExecuteListing(CancellationToken cancellationToken)
+    public async ValueTask<int> ExecuteListingAsync(ChannelReader<DirectoryInfo> reader, CancellationToken cancellationToken)
     {
         using var process = Process.Start(_processStartInfo);
         if (process == null)
         {
             Console.Error.WriteLine($"Failed to start {FuzzyFinderName}");
-            return ValueTask.FromResult(1);
+            return 1;
         }
 
         using var input = TextWriter.Synchronized(process.StandardInput);
         if (input == null)
         {
             Console.Error.WriteLine($"Failed to get StandardInput of {FuzzyFinderName}");
-            return ValueTask.FromResult(1);
+            return 1;
         }
 
-        using var searchSubscription = _searcher.SearchResults.Subscribe(d => input.WriteLine(d.FullName.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)));
+        var running = process.WaitForExitAsync(cancellationToken);
 
-        _ = _searcher.Search(cancellationToken);
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        process.EnableRaisingEvents = true;
+        process.Exited += (sender, e) => linkedCts.Cancel();
 
-        process.WaitForExit();
+        await foreach (var directory in reader.ReadAllAsync(linkedCts.Token))
+        {
+            var fullName = directory.GetNormalizedPath();
+            if (string.IsNullOrEmpty(fullName))
+            {
+                continue;
+            }
 
-        return ValueTask.FromResult(process.ExitCode);
+            if (process.HasExited)
+            {
+                break;
+            }
+
+            input.WriteLine(fullName);
+        }
+
+        await running;
+        return process.ExitCode;
     }
 }
