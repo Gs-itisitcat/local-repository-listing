@@ -58,7 +58,20 @@ public abstract class FuzzyFinderListerBase : IResultLister
                 break;
             }
 
-            input.WriteLine(fullName);
+            try
+            {
+                await input.WriteLineAsync(fullName.AsMemory(), ct);
+            }
+            catch (ObjectDisposedException)
+            {
+                // The input stream has been closed, likely because the process has exited.
+                break;
+            }
+            catch (IOException)
+            {
+                // The input stream has been closed, likely because the process has exited.
+                break;
+            }
         }
     }
 
@@ -95,7 +108,7 @@ public abstract class FuzzyFinderListerBase : IResultLister
             {
                 await feedInputTask;
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (processExitCts.IsCancellationRequested)
             {
                 // Ignore cancellation exception when the process exits
             }
