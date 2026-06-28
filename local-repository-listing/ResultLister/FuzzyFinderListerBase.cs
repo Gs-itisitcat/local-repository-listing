@@ -43,6 +43,25 @@ public abstract class FuzzyFinderListerBase : IResultLister
         };
     }
 
+    private static async Task FeedInputAsync(Process process, TextWriter input, ChannelReader<DirectoryInfo> reader, CancellationToken ct)
+    {
+        await foreach (var directory in reader.ReadAllAsync(ct))
+        {
+            var fullName = directory.GetNormalizedPath();
+            if (string.IsNullOrEmpty(fullName))
+            {
+                continue;
+            }
+
+            if (process.HasExited)
+            {
+                break;
+            }
+
+            input.WriteLine(fullName);
+        }
+    }
+
     public async ValueTask<int> ExecuteListingAsync(ChannelReader<DirectoryInfo> reader, CancellationToken cancellationToken)
     {
         using var process = Process.Start(_processStartInfo);
@@ -61,27 +80,27 @@ public abstract class FuzzyFinderListerBase : IResultLister
 
         var running = process.WaitForExitAsync(cancellationToken);
 
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        process.EnableRaisingEvents = true;
-        process.Exited += (sender, e) => linkedCts.Cancel();
+        using var processExitCts = new CancellationTokenSource();
 
-        await foreach (var directory in reader.ReadAllAsync(linkedCts.Token))
+        var feedInputTask = FeedInputAsync(process, input, reader, processExitCts.Token);
+
+        try
         {
-            var fullName = directory.GetNormalizedPath();
-            if (string.IsNullOrEmpty(fullName))
+            await running;
+        }
+        finally
+        {
+            processExitCts.Cancel();
+            try
             {
-                continue;
+                await feedInputTask;
             }
-
-            if (process.HasExited)
+            catch (OperationCanceledException)
             {
-                break;
+                // Ignore cancellation exception when the process exits
             }
-
-            input.WriteLine(fullName);
         }
 
-        await running;
         return process.ExitCode;
     }
 }
